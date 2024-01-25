@@ -10,7 +10,11 @@ python = "^3.10"
 numpy = "^1.26.3"
 pandas = "^2.2.0"
 lxml = "^5.1.0"
+requests = "^2.31.0"
 
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.29.0"
 
 [build-system]
 requires = ["poetry-core"]
