@@ -164,3 +164,4 @@ cython_debug/
 
 # Local testing
 *local_test.ipynb
+pos.json
