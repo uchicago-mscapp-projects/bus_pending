@@ -2,6 +2,7 @@ import requests
 import math
 import json
 import time
+import pathlib
 
 # TODO Hardcoded parameters
 ROUTES = ["1", "2", "3", "4", "X4", "5" ,"6" ,"7" , "8", "8A", "9"]
@@ -48,7 +49,7 @@ def make_bus_request(key, routes, format):
                 
         # Set-up query parameters 
         chunk = routes[i * 10:(i + 1) * 10]
-        rt = '&'.join(chunk)
+        rt = ','.join(chunk)
 
         # Query API
         print(f'Calling routes - {i + 1}')
@@ -69,11 +70,13 @@ def save_request(request, location):
     Saves a request output as a JSON to the specified location.
 
     Input:
-        request (dict): A dictionary storing the JSON elements.
+        request (lst): A dictionary storing the JSON elements.
         location (str): A file path to store the elements
 
-    Returns: None. Saves the dictionary.
+    Returns: None. Saves the list of request to the file.
     '''
+    # TODO: Add adding to the location
+
     # Save data to JSON
     with open(f'{location}.json', 'w') as f:
         json.dump(request, f, indent = 1)
@@ -96,7 +99,42 @@ def scrape_bus_api(file):
     routes = ROUTES # Hardcoded
 
     positions = make_bus_request(key, routes, 'json')
-    save_request(positions, "{file}")
+    save_request(positions, f"{file}")
+
+
+def create_test_data(num, file):
+    '''
+    Run multiple iterations of the scraper.
+
+    Note: TEST version includes a section save the file over and over
+        again.
+
+    Input:
+        num (int): How many times to iterate through the scraper.
+    '''
+    # New name
+    temp_name = file + "_temp"
+    for _ in range(num):
+        scrape_bus_api(temp_name)
+
+        # Load saved JSON
+        with open(f'{temp_name}.json') as f:
+            iter = json.load(f)
+        
+        # Load full JSON
+        pos_json = pathlib.Path("pos.json")
+        if pos_json.exists():
+            with open(f'{file}.json') as f:
+                temp = json.load(f)
+            combined = temp + iter # TODO Figure out why string concat works
+        else:
+            combined = iter.copy()
+        
+        # Save open JSON
+        with open(f'{file}.json', "w") as f:
+            json.dump(combined, f, indent = 1)
+        
+        time.sleep(60 - math.ceil(len(ROUTES)/10)) # 2 1 sec sleeps above, so keep on time
+
 
 # TODO: Command line implementation
-    
