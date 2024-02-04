@@ -4,24 +4,31 @@ import json
 import time
 import pathlib
 
-# TODO Hardcoded parameters
-ROUTES = ["1", "2", "3", "4", "X4", "5" ,"6" ,"7" , "8", "8A", "9"]
-
-def get_api_key(file):
+def get_stored_data(file, type):
     '''
     Function to load an API key from a file
 
     Input:
-        file (str): File with API stored as plain text. This file is expected
-            to be in a file called .apikey which is hidden by the .gitignore
-            file.
+        file (str): File to extract from plain text.
+        type (str): Type of file to extract. Two allowable options:
+            key: API stored as plain text. This file is expected
+                to be in a file called .apikey which is hidden by the 
+                .gitignore file.
+            routes: List of routes stored as a comma-delimited string on a 
+                single line. Produced by the scrape_routes.py file. In the
+                repo by default.
     
     Returns: (str) API Key
     '''
     try:
         with open(file) as f:
-            key = f.read()
-            return key.strip()
+            data = f.read()
+            if type == "key":
+                return data.strip()
+            elif type == "routes":
+                return data.split(',')
+            else:
+                KeyError('Only "key" or "routes" are allowed data to call')
     except FileNotFoundError:
         print(f'Did not locate {file}')
 
@@ -38,12 +45,12 @@ def make_bus_request(key, routes, format):
     Returns (list): A list of JSON responses from the query
     '''
     url = "http://ctabustracker.com/bustime/api/"
-    version = "v2/"
-    request = "getvehicles?"
-    if format not in ["json", "xml"]:
-        ValueError("The CTA Bustracker API only allows JSON or XML outputs")
+    ver = "v2/"
+    req = "getvehicles"
 
     # For each route list loop through them in units of ten, the max of API
+    print(f"Begin call - {time.strftime('%Y-%m-%d %H:%M:%S')}")
+    print('  Calling routes:', end = " ") 
     rv = []
     for i in range(math.ceil(len(routes)/10)):
                 
@@ -52,16 +59,17 @@ def make_bus_request(key, routes, format):
         rt = ','.join(chunk)
 
         # Query API
-        print(f'Calling routes - {i + 1}')
-        pos_chunk = requests.get(f'{url}{version}{request}key={key}&rt={rt}&format={format}')
+        print(f'{chunk[0]} to {chunk[-1]}', end = " ", flush = True)
+        pos_chunk = requests.get(f'{url}{ver}{req}?key={key}&rt={rt}&format=json')
         time.sleep(1) # One second between route things
     
         # TODO Validate query
         # Response from server
         # Data exists
             
-        rv.append(pos_chunk.json())
-
+        rv.append(pos_chunk.json()['bustime-response']) # Returned under header, so index in
+    
+    print(f"\nEnd call - {time.strftime('%Y-%m-%d %H:%M:%S')}")
     return rv
 
 
@@ -93,48 +101,11 @@ def scrape_bus_api(file):
     Return (None): Saves output file
     '''
     # Get key from file
-    key = get_api_key('.apikey')
+    key = get_stored_data('.apikey', 'key')
+    routes = get_stored_data('routes.txt', 'routes')
 
     # Establish routes
-    routes = ROUTES # Hardcoded
+    routes = routes # Hardcoded
 
     positions = make_bus_request(key, routes, 'json')
     save_request(positions, f"{file}")
-
-
-def create_test_data(num, file):
-    '''
-    Run multiple iterations of the scraper.
-
-    Note: TEST version includes a section save the file over and over
-        again.
-
-    Input:
-        num (int): How many times to iterate through the scraper.
-    '''
-    # New name
-    temp_name = file + "_temp"
-    for _ in range(num):
-        scrape_bus_api(temp_name)
-
-        # Load saved JSON
-        with open(f'{temp_name}.json') as f:
-            iter = json.load(f)
-        
-        # Load full JSON
-        pos_json = pathlib.Path("pos.json")
-        if pos_json.exists():
-            with open(f'{file}.json') as f:
-                temp = json.load(f)
-            combined = temp + iter # TODO Figure out why string concat works
-        else:
-            combined = iter.copy()
-        
-        # Save open JSON
-        with open(f'{file}.json', "w") as f:
-            json.dump(combined, f, indent = 1)
-        
-        time.sleep(60 - math.ceil(len(ROUTES)/10)) # 2 1 sec sleeps above, so keep on time
-
-
-# TODO: Command line implementation
