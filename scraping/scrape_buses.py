@@ -1,6 +1,6 @@
 import requests
 import math
-import json
+import sqlite3
 import time
 import pathlib
 
@@ -75,7 +75,7 @@ def make_bus_request(key, routes, format):
 
 def save_request(request, location):
     '''
-    Saves a request output as a JSON to the specified location.
+    Saves a request output into the buses database.
 
     Input:
         request (lst): A dictionary storing the JSON elements.
@@ -83,11 +83,31 @@ def save_request(request, location):
 
     Returns: None. Saves the list of request to the file.
     '''
-    # TODO: Add adding to the location
+    # Create a new connection to a path
+    path = pathlib.Path(f"{location}")
+    connection = sqlite3.connect(path)
+    cursor = connection.cursor()
 
-    # Save data to JSON
-    with open(f'{location}.json', 'w') as f:
-        json.dump(request, f, indent = 1)
+    # Create 
+    keys = ['vid', 'tmstmp', 'lat', 'lon', 'hdg', 'pid', 'rt', 'des', 'pdist', \
+            'dly', 'tatripid', 'origtatripno', 'tablockid', 'zone']
+    query = f"INSERT OR IGNORE INTO buses ({', '.join(keys)}) VALUES ({'?, ' * (len(keys) - 1)} ?)"
+
+    # Gather parameters from scraped data
+    for _, elem in enumerate(request):
+        params = []
+        for key in elem.keys():
+            if elem[key]:
+                params.append(str(elem[key]))
+            else:
+                params.append("") # Have a value for all params even if the API does not return one
+
+        # Write file
+        cursor.execute(query, tuple(params))
+        connection.commit()
+    
+    # Close connection after write is completed
+    connection.close()
 
 
 def scrape_bus_api(file):

@@ -22,16 +22,15 @@ if __name__ == '__main__':
     else:
         route.get_routes()
 
-    # TODO: Conduct scrape
-    
+    # Conduct scrape
+    buses.scrape_bus_api("data/buses.db")
 
     # TODO: Test below
     # Check if pos.json exists and prompt to delete it if so
-    pos_json = pathlib.Path("pos.json")
-    if pos_json.exists():
-        print("pos.json already exists. Scrape again? [y/n]")
-        if input().lower() == "y":
-            test.create_test_data(10, "pos") # TODO Replace back to scrape_bus_api
-    else:
-        test.create_test_data(10, "pos")
-    
+    #pos_json = pathlib.Path("pos.json")
+    #if pos_json.exists():
+    #    print("pos.json already exists. Scrape again? [y/n]")
+    #    if input().lower() == "y":
+    #        test.create_test_data(10, "pos") # TODO Replace back to scrape_bus_api
+    #else:
+    #    test.create_test_data(10, "pos")
