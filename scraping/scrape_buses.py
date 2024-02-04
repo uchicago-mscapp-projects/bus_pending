@@ -59,7 +59,7 @@ def make_bus_request(key, routes, format):
         rt = ','.join(chunk)
 
         # Query API
-        print(f'{chunk[0]} to {chunk[-1]}', end = " ", flush = True)
+        print(f'{chunk[0]}-{chunk[-1]}', end = ", ", flush = True)
         pos_chunk = requests.get(f'{url}{ver}{req}?key={key}&rt={rt}&format=json')
         time.sleep(1) # One second between route things
     
@@ -67,7 +67,7 @@ def make_bus_request(key, routes, format):
         # Response from server
         # Data exists
             
-        rv.append(pos_chunk.json()['bustime-response']) # Returned under header, so index in
+        rv.extend(pos_chunk.json()['bustime-response']['vehicle']) # Returned under header, so index in
     
     print(f"\nEnd call - {time.strftime('%Y-%m-%d %H:%M:%S')}")
     return rv

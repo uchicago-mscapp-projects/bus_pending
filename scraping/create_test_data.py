@@ -55,4 +55,4 @@ def create_test_data(num, file):
         with open(f'{file}.json', "w") as f:
             json.dump(combined, f, indent = 1)
         
-        time.sleep(60 - math.ceil(len(routes)/10) -2) # N 1 sec sleeps above, plus 2 seconds to run 13
+        time.sleep(60 - math.ceil(len(routes)/10) -2.33) # N 1 sec sleeps above, plus 2 seconds to run 13
