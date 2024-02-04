@@ -43,8 +43,3 @@ def make_db():
     for schema in [SCHEMA_BUSES]:
         cursor.execute(schema)
     cursor.close()
-
-
-# Create database if called from the command line 
-if __name__ == "__main__":
-    make_db()

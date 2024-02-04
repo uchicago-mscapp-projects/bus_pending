@@ -56,17 +56,3 @@ def create_test_data(num, file):
             json.dump(combined, f, indent = 1)
         
         time.sleep(60 - math.ceil(len(routes)/10) -2.33) # N 1 sec sleeps above, plus 2 seconds to run 13
-
-def save_request_locally(request, location):
-    '''
-    Saves a request output as a JSON to the specified location.
-
-    Input:
-        request (lst): A dictionary storing the JSON elements.
-        location (str): A file path to store the elements
-
-    Returns: None. Saves the list of request to the file.
-    '''
-    # Save data to JSON
-    with open(f'{location}.json', 'w') as f:
-        json.dump(request, f, indent = 1)

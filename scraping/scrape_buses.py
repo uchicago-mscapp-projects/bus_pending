@@ -33,14 +33,15 @@ def get_stored_data(file, type):
         print(f'Did not locate {file}')
 
 
-def make_bus_request(key, routes, format):
+def make_bus_request(key, routes):
     '''
     Makes a request to the CTA bus tracker API with the following parameters.
 
     Args:
-        key (str):
-        routes (str):
-        format (str):
+        key (str): API key for the CTA bus tracker API.
+        routes (str): A list of CTA bus routes to query the API from. This
+            will be chunked into API requests of no more than 10 items so that
+            the API will respond.
 
     Returns (list): A list of JSON responses from the query
     '''
@@ -124,8 +125,6 @@ def scrape_bus_api(file):
     key = get_stored_data('.apikey', 'key')
     routes = get_stored_data('routes.txt', 'routes')
 
-    # Establish routes
-    routes = routes # Hardcoded
-
+    # Scrape API
     positions = make_bus_request(key, routes, 'json')
     save_request(positions, f"{file}")
