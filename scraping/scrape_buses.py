@@ -126,5 +126,5 @@ def scrape_bus_api(file):
     routes = get_stored_data('routes.txt', 'routes')
 
     # Scrape API
-    positions = make_bus_request(key, routes, 'json')
+    positions = make_bus_request(key, routes)
     save_request(positions, f"{file}")
