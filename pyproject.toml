@@ -11,6 +11,8 @@ numpy = "^1.26.3"
 pandas = "^2.2.0"
 lxml = "^5.1.0"
 requests = "^2.31.0"
+plotly-express = "^0.4.1"
+geopandas = "^0.14.2"
 
 
 [tool.poetry.group.dev.dependencies]
