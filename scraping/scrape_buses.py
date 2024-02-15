@@ -4,6 +4,9 @@ import sqlite3
 import time
 import pathlib
 
+BUS_KEYS = ['vid', 'tmstmp', 'lat', 'lon', 'hdg', 'pid', 'rt', 'des', \
+            'pdist', 'dly', 'tatripid', 'origtatripno', 'tablockid', 'zone']
+
 def get_stored_data(file, type):
     '''
     Function to load an API key from a file
@@ -62,11 +65,11 @@ def make_bus_request(key, routes):
         # Query API
         print(f'{chunk[0]}-{chunk[-1]}', end = ", ", flush = True)
         pos_chunk = requests.get(f'{url}{ver}{req}?key={key}&rt={rt}&format=json')
-        time.sleep(1) # One second between route things
+        time.sleep(1) # One second between route chunk
     
-        # TODO Validate query
-        # Response from server
-        # Data exists
+        # Print message if key error 
+        if pos_chunk.json()['bustime-response']['error']:
+            raise ValueError(f"Received error: {pos_chunk.json()['bustime-response']['error']['msg']}")
             
         rv.extend(pos_chunk.json()['bustime-response']['vehicle']) # Returned under header, so index in
     
@@ -74,25 +77,27 @@ def make_bus_request(key, routes):
     return rv
 
 
-def save_request(request, location):
+def save_request(request, location, type):
     '''
     Saves a request output into the buses database.
 
     Input:
         request (lst): A dictionary storing the JSON elements.
         location (str): A file path to store the elements
+        type (str):
 
     Returns: None. Saves the list of request to the file.
     '''
     # Create a new connection to a path
-    path = pathlib.Path(f"{location}")
+    path = pathlib.Path(f'{location}')
     connection = sqlite3.connect(path)
     cursor = connection.cursor()
 
-    # Create 
-    keys = ['vid', 'tmstmp', 'lat', 'lon', 'hdg', 'pid', 'rt', 'des', 'pdist', \
-            'dly', 'tatripid', 'origtatripno', 'tablockid', 'zone']
-    query = f"INSERT OR IGNORE INTO buses ({', '.join(keys)}) VALUES ({'?, ' * (len(keys) - 1)} ?)"
+    # Create query to write buses
+    if type == 'bus':
+        keys = BUS_KEYS
+        tab = 'buses'
+    query = f"INSERT OR IGNORE INTO {tab} ({', '.join(keys)}) VALUES ({'?, ' * (len(keys) - 1)} ?)"
 
     # Gather parameters from scraped data
     for _, elem in enumerate(request):
