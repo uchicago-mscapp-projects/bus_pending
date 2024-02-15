@@ -166,3 +166,6 @@ cython_debug/
 *local_test.ipynb
 pos.json
 data/
+
+# Environment stuff
+env.sh
