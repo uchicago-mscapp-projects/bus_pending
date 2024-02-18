@@ -1,8 +1,8 @@
 import requests
 import math
-import sqlite3
 import time
-import pathlib
+
+from scraping.make_db import save_request
 
 BUS_KEYS = ['vid', 'tmstmp', 'lat', 'lon', 'hdg', 'pid', 'rt', 'des', \
             'pdist', 'dly', 'tatripid', 'origtatripno', 'tablockid', 'zone']
@@ -68,52 +68,16 @@ def make_bus_request(key, routes):
         time.sleep(1) # One second between route chunk
     
         # Print message if key error 
-        if pos_chunk.json()['bustime-response']['error']:
-            raise ValueError(f"Received error: {pos_chunk.json()['bustime-response']['error']['msg']}")
-            
+        if 'error' in pos_chunk.json()['bustime-response'].keys():
+            for error in pos_chunk.json()['bustime-response']['error']:
+                # Exclude route not running error
+                if error['msg'] != 'No data found for parameter':
+                    raise ValueError(f"Received error: {pos_chunk.json()['bustime-response']['error']}")
+        
         rv.extend(pos_chunk.json()['bustime-response']['vehicle']) # Returned under header, so index in
     
     print(f"\nEnd call - {time.strftime('%Y-%m-%d %H:%M:%S')}")
     return rv
-
-
-def save_request(request, location, type):
-    '''
-    Saves a request output into the buses database.
-
-    Input:
-        request (lst): A dictionary storing the JSON elements.
-        location (str): A file path to store the elements
-        type (str):
-
-    Returns: None. Saves the list of request to the file.
-    '''
-    # Create a new connection to a path
-    path = pathlib.Path(f'{location}')
-    connection = sqlite3.connect(path)
-    cursor = connection.cursor()
-
-    # Create query to write buses
-    if type == 'bus':
-        keys = BUS_KEYS
-        tab = 'buses'
-    query = f"INSERT OR IGNORE INTO {tab} ({', '.join(keys)}) VALUES ({'?, ' * (len(keys) - 1)} ?)"
-
-    # Gather parameters from scraped data
-    for _, elem in enumerate(request):
-        params = []
-        for key in elem.keys():
-            if elem[key]:
-                params.append(str(elem[key]))
-            else:
-                params.append("") # Have a value for all params even if the API does not return one
-
-        # Write file
-        cursor.execute(query, tuple(params))
-        connection.commit()
-    
-    # Close connection after write is completed
-    connection.close()
 
 
 def scrape_bus_api(file):
@@ -132,4 +96,4 @@ def scrape_bus_api(file):
 
     # Scrape API
     positions = make_bus_request(key, routes)
-    save_request(positions, f"{file}")
+    save_request(positions, f'{file}', 'buses', BUS_KEYS)
