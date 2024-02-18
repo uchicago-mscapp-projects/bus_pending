@@ -80,6 +80,7 @@ def make_db():
     '''
     # First generate path
     path = pathlib.Path("data/buses.db")
+    path.unlink() # Delete if it exists already
 
     # Create a new connection to a path
     connection = sqlite3.connect(path)
@@ -108,21 +109,17 @@ def save_request(request, location, table, keys):
     connection = sqlite3.connect(path)
     cursor = connection.cursor()
 
+    # Build parameter lists
+    params = []
+    for key in request[0].keys():
+        params.append(f':{key}')
     # Create query to write buses
-    query = f"INSERT OR IGNORE INTO {table} ({', '.join(keys)}) VALUES ({'?, ' * (len(keys) - 1)} ?)"
+    # executemany with dict placeholders from https://stackoverflow.com/a/70548130
+    query = f"INSERT OR IGNORE INTO {table} ({', '.join(keys)}) VALUES ({', '.join(params)})"
 
-    # Gather parameters from scraped data
-    for _, elem in enumerate(request):
-        params = []
-        for key in elem.keys():
-            if elem[key]:
-                params.append(str(elem[key]))
-            else:
-                params.append("") # Have a value for all params even if the API does not return one
-
-        # Write file
-        cursor.execute(query, tuple(params))
-        connection.commit()
+    # Write file
+    cursor.executemany(query, request)
+    connection.commit()
     
     # Close connection after write is completed
     connection.close()

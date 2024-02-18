@@ -2,6 +2,7 @@ import sys
 import pathlib
 import scraping.scrape_buses as buses
 import scraping.scrape_routes as route
+import scraping.scrape_schedules as schedules
 import scraping.make_db as make_db
 
 if __name__ == '__main__':
@@ -34,10 +35,12 @@ if __name__ == '__main__':
         print('buses.db already exists. Build and add schedules [y/n]')
         if input().lower() == 'y':
             make_db.make_db()
+            schedules.scrape()
     elif db.exists() and quiet:
         pass
     else:
         make_db.make_db()
+        schedules.scrape()
 
     # Conduct scrape
     buses.scrape_bus_api('data/buses.db')
