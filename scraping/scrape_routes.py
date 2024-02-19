@@ -23,14 +23,13 @@ def get_routes(file = "routes.txt"):
 
     # Make request as a JSON
     rts = requests.get(f"{url}{ver}{req}?key={key}&format=json")
-    print(rts.json())
 
     # Print message if key error 
-    if "error" in rts.json()['bustime-response']:
-        print("Request not succesful.")
+    if 'error' in rts.json()['bustime-response'].keys():
         for error in rts.json()['bustime-response']['error']:
-            print(f"Error: {error['msg']}")
-        print("\n")
+            # Exclude route not running error
+            if error['msg'] != 'No data found for parameter':
+                raise ValueError(f"Received error: {rts.json()['bustime-response']['error']}")
     
     # Extract response as a list and then store as a list
     rv = []
