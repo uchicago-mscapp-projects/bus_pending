@@ -74,7 +74,11 @@ def make_bus_request(key, routes):
                 if error['msg'] != 'No data found for parameter':
                     raise ValueError(f"Received error: {pos_chunk.json()['bustime-response']['error']}")
         
-        rv.extend(pos_chunk.json()['bustime-response']['vehicle']) # Returned under header, so index in
+        # SKip if all routes in a chunk are not running
+        if 'vehicle' not in pos_chunk.json()['bustime-response'].keys():
+            continue
+        else:
+            rv.extend(pos_chunk.json()['bustime-response']['vehicle']) # Returned under header, so index in
     
     print(f"\nEnd call - {time.strftime('%Y-%m-%d %H:%M:%S')}")
     return rv
