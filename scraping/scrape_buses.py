@@ -65,7 +65,7 @@ def make_bus_request(key, routes):
         # Query API
         print(f'{chunk[0]}-{chunk[-1]}', end = ", ", flush = True)
         pos_chunk = requests.get(f'{url}{ver}{req}?key={key}&rt={rt}&format=json')
-        time.sleep(1) # One second between route chunk
+        time.sleep(2) # One second between route chunk
     
         # Print message if key error 
         if 'error' in pos_chunk.json()['bustime-response'].keys():
