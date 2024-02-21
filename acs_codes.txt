@@ -1,0 +1,11 @@
+
+----- INCOME VARIABLES -----
+"B19113_001E": Median Family Income in the Past 12 Monthd
+
+"B07010_004E"-"B07010_011E": Geographical Mobility in the Past Year by Individual Income in the Past 12 Months (in 2022 Inflation-Adjusted Dollars) for Current Residence in the United States (multiple income levels)
+"B09010_001E": Receipt of Supplemental Security Income (SSI), Cash Public Assistance Income, or Food Stamps/SNAP in the Past 12 Months by Household Type for Children Under 18 Years in Households
+
+----- GEOGRAPHIC VARIABLES -----
+"GEOCOMP" GEO_ID Component 
+"PRINCITY" Geography
+"ucgid" Uniform Census Geography Identifier clause 
