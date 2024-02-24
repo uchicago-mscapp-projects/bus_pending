@@ -1,9 +1,8 @@
 ----------------------------------
 
 # CTA INFO
-- Download routesshape file: https://catalog.data.gov/dataset/cta-bus-routes-shapefile
-- Download bus stops shapefile: https://catalog.data.gov/dataset/cta-bus-stops-shapefile
-
+- Download routes shape file: https://catalog.data.gov/dataset/cta-bus-routes-shapefile
+- Bus Stops Geojson: https://data.cityofchicago.org/Transportation/CTA-Bus-Stops/hvnx-qtky 
 
 ----------------------------------
 ## GEOGRAPHIC UNITS: 
