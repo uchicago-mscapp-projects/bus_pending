@@ -1,9 +1,10 @@
 ----------------------------------
 
 # CTA INFO
-- Download routesshape file: https://catalog.data.gov/dataset/cta-bus-routes-shapefile
-- Download bus stops shapefile: https://catalog.data.gov/dataset/cta-bus-stops-shapefile
+- Download routes shape file: https://catalog.data.gov/dataset/cta-bus-routes-shapefile
+- Bus Stops Geojson: https://data.cityofchicago.org/Transportation/CTA-Bus-Stops/hvnx-qtky 
 
+What I would like to get: https://www.arcgis.com/apps/mapviewer/index.html?layers=1e296eddbc6d4869ab6c89a6688111b0 
 
 ----------------------------------
 ## GEOGRAPHIC UNITS: 

@@ -9,3 +9,7 @@
 "GEOCOMP" GEO_ID Component 
 "PRINCITY" Geography
 "ucgid" Uniform Census Geography Identifier clause 
+
+
+--- DASHBORD QUERY FOR INCOME INFORMATION BY ZIP CODE ----
+https://data.census.gov/table/ACSDT5Y2018.B06011?t=Income+and+Poverty&g=040XX00US17%248600000&y=2018&d=ACS+5-Year+Estimates+Detailed+Tables
