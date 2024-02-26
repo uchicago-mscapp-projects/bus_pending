@@ -4,6 +4,8 @@
 - Download routes shape file: https://catalog.data.gov/dataset/cta-bus-routes-shapefile
 - Bus Stops Geojson: https://data.cityofchicago.org/Transportation/CTA-Bus-Stops/hvnx-qtky 
 
+What I would like to get: https://www.arcgis.com/apps/mapviewer/index.html?layers=1e296eddbc6d4869ab6c89a6688111b0 
+
 ----------------------------------
 ## GEOGRAPHIC UNITS: 
 - Sociodemographic data will be extracted from the ACS

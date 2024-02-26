@@ -1,13 +1,22 @@
 from dash import Dash, html, dcc, Input, Output
 import plotly.express as px 
+import plotly.graph_objects as go
+import geopandas as gpd
 import pandas as pd
+import pydeck as pdk
 import json
+import dash_deck 
+
+# MAPBOX Token 
+mapbox_api_token = ""
 
 # Initialize app --------------------------------------------------------------
+
 app = Dash(__name__)
 
 # Clean data ------------------------------------------------------------------
 
+### Income data 
 # Load income data 
 file = open("acs_data/df_income_zip_code_series.csv")
 df_income = pd.read_csv(file)
@@ -30,9 +39,61 @@ df_income["zip"] = df_income["zip"].astype("string")
 df_income_chicago = df_income[df_income["zip"].isin(chicago_zip_codes)]
 
 
+### Bus stops geo data
+geo_bus_stops = gpd.read_file("geodata/CTA_Bus_Stops.geojson")
+
+fig_stops = px.scatter_geo(geo_bus_stops, 
+                lat = geo_bus_stops.geometry.y, 
+                lon = geo_bus_stops.geometry.x, 
+                hover_name = "public_nam")
+
+
+fig_stops.update_geos(fitbounds="locations")
+fig_stops.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+
+
+# Map with deck --------------------------------------------------------------
+
+# Center plot around Chicago 
+view_chicago = pdk.ViewState(
+    latitude = 41.8781, longitude = -87.6298, zoom = 12)
+
+# Build scatterplot layer
+my_layers = [
+    # Bus Stops 
+    pdk.Layer(
+        type = "ScatterplotLayer", 
+        data = geo_bus_stops, 
+        pickable = True, 
+        get_position = "geometry.coordinates", 
+        get_fill_color = [255, 0, 0],
+        radius_scale = 15
+    )
+]
+
+# Render Deck object with centered view and scatter layer
+chi = pdk.Deck(
+    layers = my_layers, 
+    initial_view_state = view_chicago, 
+    map_style='light', 
+    )
+
+# Convert to html
+chi.to_html("example.html")
+
+# Save as deck_compontent to render in dash 
+deck_component = dash_deck.DeckGL(
+    chi.to_json(), id="deck-gl", tooltip=True, 
+    mapboxKey=mapbox_api_token,
+)
+
 # APP Layout ------------------------------------------------------------------
+
 app.layout = html.Div([
-    # Website title
+    html.H2("Welcome to bus_pending"), 
+    html.H3("Results should arrive soon!"),
+
+    # INCOME DATA BY ZIP CODE 
     html.H4("Chicago income differentials by zip code"), 
     html.P("Select an option:"), 
     # Input for interactive map
@@ -41,14 +102,25 @@ app.layout = html.Div([
        options = df_income["year"].unique(), 
        value = 2022, 
     ), 
-    # Callout to first map
-    dcc.Graph(id = "map_chi_communities"),
+    # Callout to map
+    dcc.Graph(id = "map_chi_zips"),
+
+    # CTA Bus Stops with Plotly
+    html.H4("Every bus stop in Chicago!"), 
+    html.P("This plot was made with ploty"), 
+    dcc.Graph(figure = fig_stops), 
+    
+    ## CTA Bus Stops with pydec
+    html.H4("Every bus stop in Chicago!"), 
+    html.P("This plot was made with pydeck"), 
+    deck_component
+  
 ])
 
 
 # Interactive maps ------------------------------------------------------------
 @app.callback(
-    Output("map_chi_communities", "figure"), 
+    Output("map_chi_zips", "figure"), 
     Input("user_year", "value"), 
     )
 
