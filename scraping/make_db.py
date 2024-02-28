@@ -80,7 +80,8 @@ def make_db():
     '''
     # First generate path
     path = pathlib.Path("data/buses.db")
-    path.unlink() # Delete if it exists already
+    if pathlib.Path(path).is_file():
+        path.unlink() # Delete if it exists already
 
     # Create a new connection to a path
     connection = sqlite3.connect(path)
