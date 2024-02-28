@@ -9,8 +9,9 @@ from scraping.make_db import save_request
 
 # Filenames
 URL = 'https://www.transitchicago.com/downloads/sch_data/'
-STOPS = 'stops.txt'
+CALENDAR = 'calendar.txt'
 SCHEDULE = 'stop_times.txt'
+STOPS = 'stops.txt'
 TRIPS = 'trips.txt'
 ZIP = 'google_transit.zip'
 # Names for dataframes
@@ -22,10 +23,13 @@ SCHEDULE_KEYS = ['trip_id', 'arrival_time', 'departure_time', 'stop_id', \
                  'shape_dist_traveled']
 TRIPS_KEYS = ['route_id','service_id', 'trip_id', 'direction_id', 'block_id', \
               'shape_id','direction', 'wheelchair_accessible', 'schd_trip_id']
+CALENDAR_KEYS = ['service_id', 'monday', 'tuesday', 'wednesday', 'thursday', 
+                 'friday', 'saturday', 'sunday', 'start_date', 'end_date']
 # List of tuples for scraping scripts
 TO_CLEAN = [(STOPS, STOPS_KEYS, 'stops'), \
             (SCHEDULE, SCHEDULE_KEYS, 'schedule'), \
-            (TRIPS, TRIPS_KEYS, 'trips')]
+            (TRIPS, TRIPS_KEYS, 'trips'), \
+            (CALENDAR, CALENDAR_KEYS, 'calendar')]
 
 
 def download_file(url, file):
@@ -81,7 +85,6 @@ def scrape():
 
     # Load
     for file, names, table in TO_CLEAN:
-        print(table)
         lst = load_txt_as_csv(file)
 
         # Save them to the buses.db database
