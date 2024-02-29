@@ -73,6 +73,23 @@ SCHEMA_TRIPS = '''
     );
 '''
 
+SCHEMA_CALENDAR = '''
+    CREATE TABLE calendar (
+        service_id TEXT,
+        monday BOOL,
+        tuesday BOOL,
+        wednesday BOOL,
+        thursday BOOL, 
+        friday BOOL, 
+        saturday BOOL,
+        sunday BOOL,
+        start_date TEXT,
+        end_date TEXT,
+        PRIMARY KEY (service_id),
+        FOREIGN KEY (service_id) REFERENCES trips(service_id)
+    );
+'''
+
 
 def make_db():
     '''
@@ -80,14 +97,16 @@ def make_db():
     '''
     # First generate path
     path = pathlib.Path("data/buses.db")
-    path.unlink() # Delete if it exists already
+    if pathlib.Path(path).is_file():
+        path.unlink() # Delete if it exists already
 
     # Create a new connection to a path
     connection = sqlite3.connect(path)
     cursor = connection.cursor()
 
     # Create table for both schems
-    for schema in [SCHEMA_BUSES, SCHEMA_SCHEDULE, SCHEMA_STOPS, SCHEMA_TRIPS]:
+    for schema in [SCHEMA_BUSES, SCHEMA_SCHEDULE, SCHEMA_STOPS, SCHEMA_TRIPS, \
+                   SCHEMA_CALENDAR]:
         cursor.execute(schema)
     cursor.close()
 

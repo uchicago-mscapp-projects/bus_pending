@@ -6,3 +6,4 @@ then
 # Passing to y to bash from: https://stackoverflow.com/a/3385064
 else 
     y | python -m scraping
+fi
