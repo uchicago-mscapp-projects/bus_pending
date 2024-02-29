@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <title>pydeck</title>
+        <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.0/mapbox-gl.js"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" />
+    <script src='https://cdn.jsdelivr.net/npm/@deck.gl/jupyter-widget@~8.8.*/dist/index.js'></script>
+    <style>
+    body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+#deck-container {
+  width: 100vw;
+  height: 100vh;
+}
+
+#deck-container canvas {
+  z-index: 1;
+  background: none;
+}
+    </style>
+  </head>
+  <body>
+    <div id="deck-container">
+    </div>
+  </body>
+  <script>
+    const container = document.getElementById('deck-container');
+    const jsonInput = {
+  "initialViewState": {
+    "bearing": 0,
+    "latitude": 41.8781,
+    "longitude": -87.6298,
+    "pitch": 45,
+    "zoom": 12
+  },
+  "layers": [
+    {
+      "@@type": "TripsLayer",
+      "currentTime": 0,
+      "data": "{\"type\": \"FeatureCollection\", \"features\": [{\"id\": \"0\", \"type\": \"Feature\", \"properties\": {\"vid\": 7936, \"tmstmp\": \"20240130 22:12\", \"lat\": 41.730838775634766, \"lon\": -87.61434173583984, \"hdg\": 359, \"pid\": 18414, \"rt\": \"3\", \"des\": \"Michigan/Chicago\", \"pdist\": 6368, \"dly\": false, \"tatripid\": 393, \"origtatripno\": 251981024, \"tablockid\": \"N4  -793\", \"zone\": \"\", \"coordinates\": [\"-87.61434173583984\", \"41.730838775634766\"], \"unix_tmstmp\": 60}, \"geometry\": {\"type\": \"Point\", \"coordinates\": [-87.61434173583984, 41.730838775634766]}}, {\"id\": \"56\", \"type\": \"Feature\", \"properties\": {\"vid\": 7936, \"tmstmp\": \"20240130 22:40\", \"lat\": 41.80255391047551, \"lon\": -87.6160888671875, \"hdg\": 349, \"pid\": 18414, \"rt\": \"3\", \"des\": \"Michigan/Chicago\", \"pdist\": 32634, \"dly\": false, \"tatripid\": 393, \"origtatripno\": 251981024, \"tablockid\": \"N4  -793\", \"zone\": \"\", \"coordinates\": [\"-87.6160888671875\", \"41.80255391047551\"], \"unix_tmstmp\": 1740}, \"geometry\": {\"type\": \"Point\", \"coordinates\": [-87.6160888671875, 41.80255391047551]}}, {\"id\": \"104\", \"type\": \"Feature\", \"properties\": {\"vid\": 7936, \"tmstmp\": \"20240130 22:41\", \"lat\": 41.80741570212624, \"lon\": -87.616455078125, \"hdg\": 359, \"pid\": 18414, \"rt\": \"3\", \"des\": \"Michigan/Chicago\", \"pdist\": 34408, \"dly\": false, \"tatripid\": 393, \"origtatripno\": 251981024, \"tablockid\": \"N4  -793\", \"zone\": \"\", \"coordinates\": [\"-87.616455078125\", \"41.80741570212624\"], \"unix_tmstmp\": 1800}, \"geometry\": {\"type\": \"Point\", \"coordinates\": [-87.616455078125, 41.80741570212624]}}, {\"id\": \"152\", \"type\": \"Feature\", \"properties\": {\"vid\": 7936, \"tmstmp\": \"20240130 22:42\", \"lat\": 41.810429074871, \"lon\": -87.61653137207031, \"hdg\": 359, \"pid\": 18414, \"rt\": \"3\", \"des\": \"Michigan/Chicago\", \"pdist\": 35525, \"dly\": false, \"tatripid\": 393, \"origtatripno\": 251981024, \"tablockid\": \"N4  -793\", \"zone\": \"\", \"coordinates\": [\"-87.61653137207031\", \"41.810429074871\"], \"unix_tmstmp\": 1860}, \"geometry\": {\"type\": \"Point\", \"coordinates\": [-87.61653137207031, 41.810429074871]}}, {\"id\": \"200\", \"type\": \"Feature\", \"properties\": {\"vid\": 7936, \"tmstmp\": \"20240130 22:43\", \"lat\": 41.815853118896484, \"lon\": -87.6166763305664, \"hdg\": 358, \"pid\": 18414, \"rt\": \"3\", \"des\": \"Michigan/Chicago\", \"pdist\": 37512, \"dly\": false, \"tatripid\": 393, \"origtatripno\": 251981024, \"tablockid\": \"N4  -793\", \"zone\": \"\", \"coordinates\": [\"-87.6166763305664\", \"41.815853118896484\"], \"unix_tmstmp\": 1920}, \"geometry\": {\"type\": \"Point\", \"coordinates\": [-87.6166763305664, 41.815853118896484]}}, {\"id\": \"248\", \"type\": \"Feature\", \"properties\": {\"vid\": 7936, \"tmstmp\": \"20240130 22:44\", \"lat\": 41.81888192275475, \"lon\": -87.61675262451172, \"hdg\": 359, \"pid\": 18414, \"rt\": \"3\", \"des\": \"Michigan/Chicago\", \"pdist\": 38624, \"dly\": false, \"tatripid\": 393, \"origtatripno\": 251981024, \"tablockid\": \"N4  -793\", \"zone\": \"\", \"coordinates\": [\"-87.61675262451172\", \"41.81888192275475\"], \"unix_tmstmp\": 1980}, \"geometry\": {\"type\": \"Point\", \"coordinates\": [-87.61675262451172, 41.81888192275475]}}, {\"id\": \"296\", \"type\": \"Feature\", \"properties\": {\"vid\": 7936, \"tmstmp\": \"20240130 22:45\", \"lat\": 41.82216544773268, \"lon\": -87.61683654785156, \"hdg\": 359, \"pid\": 18414, \"rt\": \"3\", \"des\": \"Michigan/Chicago\", \"pdist\": 39817, \"dly\": false, \"tatripid\": 393, \"origtatripno\": 251981024, \"tablockid\": \"N4  -793\", \"zone\": \"\", \"coordinates\": [\"-87.61683654785156\", \"41.82216544773268\"], \"unix_tmstmp\": 2040}, \"geometry\": {\"type\": \"Point\", \"coordinates\": [-87.61683654785156, 41.82216544773268]}}, {\"id\": \"344\", \"type\": \"Feature\", \"properties\": {\"vid\": 7936, \"tmstmp\": \"20240130 22:46\", \"lat\": 41.827345863717504, \"lon\": -87.616943359375, \"hdg\": 0, \"pid\": 18414, \"rt\": \"3\", \"des\": \"Michigan/Chicago\", \"pdist\": 41713, \"dly\": false, \"tatripid\": 393, \"origtatripno\": 251981024, \"tablockid\": \"N4  -793\", \"zone\": \"\", \"coordinates\": [\"-87.616943359375\", \"41.827345863717504\"], \"unix_tmstmp\": 2100}, \"geometry\": {\"type\": \"Point\", \"coordinates\": [-87.616943359375, 41.827345863717504]}}, {\"id\": \"391\", \"type\": \"Feature\", \"properties\": {\"vid\": 7936, \"tmstmp\": \"20240130 22:47\", \"lat\": 41.83189153671265, \"lon\": -87.61686706542969, \"hdg\": 358, \"pid\": 18414, \"rt\": \"3\", \"des\": \"Michigan/Chicago\", \"pdist\": 43377, \"dly\": false, \"tatripid\": 393, \"origtatripno\": 251981024, \"tablockid\": \"N4  -793\", \"zone\": \"\", \"coordinates\": [\"-87.61686706542969\", \"41.83189153671265\"], \"unix_tmstmp\": 2160}, \"geometry\": {\"type\": \"Point\", \"coordinates\": [-87.61686706542969, 41.83189153671265]}}, {\"id\": \"438\", \"type\": \"Feature\", \"properties\": {\"vid\": 7936, \"tmstmp\": \"20240130 22:48\", \"lat\": 41.835063145078465, \"lon\": -87.61695861816406, \"hdg\": 352, \"pid\": 18414, \"rt\": \"3\", \"des\": \"Michigan/Chicago\", \"pdist\": 44545, \"dly\": false, \"tatripid\": 393, \"origtatripno\": 251981024, \"tablockid\": \"N4  -793\", \"zone\": \"\", \"coordinates\": [\"-87.61695861816406\", \"41.835063145078465\"], \"unix_tmstmp\": 2220}, \"geometry\": {\"type\": \"Point\", \"coordinates\": [-87.61695861816406, 41.835063145078465]}}, {\"id\": \"484\", \"type\": \"Feature\", \"properties\": {\"vid\": 7936, \"tmstmp\": \"20240130 22:49\", \"lat\": 41.836931663647036, \"lon\": -87.61696290133293, \"hdg\": 354, \"pid\": 18414, \"rt\": \"3\", \"des\": \"Michigan/Chicago\", \"pdist\": 45226, \"dly\": false, \"tatripid\": 393, \"origtatripno\": 251981024, \"tablockid\": \"N4  -793\", \"zone\": \"\", \"coordinates\": [\"-87.61696290133293\", \"41.836931663647036\"], \"unix_tmstmp\": 2280}, \"geometry\": {\"type\": \"Point\", \"coordinates\": [-87.61696290133293, 41.836931663647036]}}, {\"id\": \"530\", \"type\": \"Feature\", \"properties\": {\"vid\": 7936, \"tmstmp\": \"20240130 22:50\", \"lat\": 41.83848805214042, \"lon\": -87.61704368021951, \"hdg\": 358, \"pid\": 18414, \"rt\": \"3\", \"des\": \"Michigan/Chicago\", \"pdist\": 45797, \"dly\": false, \"tatripid\": 393, \"origtatripno\": 251981024, \"tablockid\": \"N4  -793\", \"zone\": \"\", \"coordinates\": [\"-87.61704368021951\", \"41.83848805214042\"], \"unix_tmstmp\": 2340}, \"geometry\": {\"type\": \"Point\", \"coordinates\": [-87.61704368021951, 41.83848805214042]}}]}",
+      "getColor": [
+        253,
+        128,
+        93
+      ],
+      "getPath": "@@=coordinates",
+      "getTimestamps": "@@=timestamps",
+      "id": "229da938-e735-4791-b619-a04b0335b745",
+      "opacity": 0.8,
+      "rounded": true,
+      "trailLength": 600,
+      "widthMinPixels": 5
+    }
+  ],
+  "mapProvider": "carto",
+  "mapStyle": "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
+  "views": [
+    {
+      "@@type": "MapView",
+      "controller": true
+    }
+  ]
+};
+    const tooltip = true;
+    const customLibraries = null;
+    const configuration = null;
+
+    const deckInstance = createDeck({
+                  container,
+      jsonInput,
+      tooltip,
+      customLibraries,
+      configuration
+    });
+
+  </script>
+</html>
