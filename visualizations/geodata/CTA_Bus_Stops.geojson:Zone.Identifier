@@ -1,4 +1,0 @@
-[ZoneTransfer]
-ZoneId=3
-ReferrerUrl=https://data.cityofchicago.org/Transportation/CTA-Bus-Stops/hvnx-qtky
-HostUrl=https://data.cityofchicago.org/api/geospatial/hvnx-qtky?method=export&format=GeoJSON

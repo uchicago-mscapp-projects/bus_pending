@@ -1,4 +1,0 @@
-[ZoneTransfer]
-ZoneId=3
-ReferrerUrl=https://data.cityofchicago.org/Facilities-Geographic-Boundaries/Boundaries-Neighborhoods/bbvz-uum9
-HostUrl=https://data.cityofchicago.org/api/geospatial/bbvz-uum9?method=export&format=GeoJSON

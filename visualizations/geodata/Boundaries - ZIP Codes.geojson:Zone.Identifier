@@ -1,4 +1,0 @@
-[ZoneTransfer]
-ZoneId=3
-ReferrerUrl=https://data.cityofchicago.org/Facilities-Geographic-Boundaries/Boundaries-ZIP-Codes/gdcf-axmw
-HostUrl=https://data.cityofchicago.org/api/geospatial/gdcf-axmw?method=export&format=GeoJSON
