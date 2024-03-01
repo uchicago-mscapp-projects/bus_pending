@@ -12,10 +12,10 @@ Welcome to Bus Pending (results should arrive soon!) ⌚
 
 # Authors :writing_hand:
 
-Michael Rosenbaum      | [GitHub]([https://github.com/yadira-peralta](https://github.com/m-rosenbaum)) | 
------------- | ------------- | -------------
-Keling Yue             | [GitHub]([https://github.com/marianafdz465](https://github.com/keling888)) | 
-Daniel Muñoz           | [GitHub]([https://github.com/AndreaLuviano](https://github.com/dmunozbatista)) | 
+Michael Rosenbaum      | [GitHub](https://github.com/m-rosenbaum) | 
+:------------: | :-------------: | 
+Keling Yue             | [GitHub](https://github.com/keling888) | 
+Daniel Muñoz           | [GitHub](https://github.com/dmunozbatista) | 
 Regina Isabel Medina   | [GitHub](https://github.com/RMedina19) | 
 
 # License :scroll:
