@@ -7,13 +7,11 @@ pd.set_option('display.max_columns', None)
 
 
 
-conn = sqlite3.connect('/Users/kelingsdatabase/Documents/CS122 Project/buses(2hr).db')
-query = "SELECT * FROM buses WHERE tmstmp > '20240218 16:25'"
+conn = sqlite3.connect('/Users/kelingsdatabase/Documents/CS122 Project/buses_static_2024-02-29.db')
+query = "SELECT * FROM buses WHERE tmstmp > '20240220 23:59'"
 df = pd.read_sql_query(query, conn)
 
 conn.close()
-
-df = df.sort_values(by=['vid', 'tmstmp'], ascending=[True, True])
 
 ## intitial filterings
 
@@ -24,11 +22,14 @@ def ghostbuses(df):
     and set the pdist to 0
     this is an in-place modification
     """
+    df = df.copy()
     df['GroupSize'] = df.groupby('vid')['vid'].transform('count')
     df['status'] = np.where(df['GroupSize'] == 1, 'Ghost', pd.NA)
-    df[df['status'] == 'Ghost']['pdist'] = 0
+    df.loc[df['status'] == 'Ghost', 'pdist'] = 0
 
     return df
+
+df = ghostbuses(df)
 
 
 def determine_occurrence(subset):
@@ -37,13 +38,14 @@ def determine_occurrence(subset):
     count how many minutes this bus has run in this trip
     this function is designed to modify df in place!!
     """
+    subset = subset.copy()
     subset['change'] = subset['des'] != subset['des'].shift()
     subset['group'] = subset['change'].cumsum()
     consecutive_counts = subset.groupby('group').size()
-    counts_df = consecutive_counts.reset_index(name='consecutive_counts')
-    subset = pd.merge(subset, counts_df, on='group', how='left')
+    counts_df = consecutive_counts.reset_index(name='consecutive_counts').set_index('group')
+    final_df = pd.merge(subset, counts_df, left_on='group', right_index=True, how='left')
 
-    return subset
+    return final_df
 
 
 def error_dealing(subset):
@@ -64,18 +66,37 @@ def error_dealing(subset):
 
 concat_subsets = []  # List to store each processed subset
 
-for name, subset in df.groupby(by = 'vid'):
-    ghostbuses(subset)
-    determine_occurrence(subset)
-    error_dealing(subset)
-    subset.drop('change','group','consective_counts')
-    complete_df = determine_occurrence(subset[subset['error'] == 'complete'])
-    merged_df = pd.merge(subset, complete_df, on='group', how='left')
-    concat_subsets.append(merged_df)
 
+def final_observation(df):
+    grouped_sum = df.groupby('group_x')['pdist_x'].transform('max')
+    df['total_dist'] = grouped_sum 
+    last_values = df.groupby('group_x')['hdg_x'].transform('last')
+    df['last_value'] = last_values
+
+    return df
+
+
+for name, subset in df.groupby(by = 'vid'):
+
+    subset_2 = determine_occurrence(subset)
+    error_dealing(subset_2)
+    #subset.drop('change','group','consective_counts')
+    complete_df = determine_occurrence(subset_2[subset_2['error'] == 'complete'])
+    #determine_occurrence(subset)
+    merged_df = pd.merge(subset_2, complete_df, on='tmstmp', how='left')
+    pdist_accu = merged_df
+    final_df = final_observation(merged_df)
+    concat_subsets.append(final_df)
     
-final_df = pd.concat(concat_subsets)
-final_df.to_csv('CONCAT_VERSION')
+final_dfs = pd.concat(concat_subsets)
+final_dfs.drop('vid_y,	lat_y,	lon_y,	hdg_y,	pid_y,	pdist_y,	rt_y,	des_y,	dly_y,	tatripid_y,	tablockid_y,	zone_y,	origtatripno_y,	GroupSize_y,	status_y')
+
+final_dfs.to_csv('CONCAT_VERSION.csv')
+
+
+
+
+
 
 
 
