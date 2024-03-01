@@ -89,7 +89,7 @@ for name, subset in df.groupby(by = 'vid'):
     concat_subsets.append(final_df)
     
 final_dfs = pd.concat(concat_subsets)
-final_dfs.drop('vid_y,	lat_y,	lon_y,	hdg_y,	pid_y,	pdist_y,	rt_y,	des_y,	dly_y,	tatripid_y,	tablockid_y,	zone_y,	origtatripno_y,	GroupSize_y,	status_y')
+final_dfs.drop(columns=['vid_y',	'lat_y',	'lon_y',	'hdg_y',	'pid_y',	'pdist_y',	'rt_y',	'des_y',	'dly_y',	'tatripid_y',	'tablockid_y',	'zone_y',	'origtatripno_y',	'GroupSize_y',	'status_y'])
 
 final_dfs.to_csv('CONCAT_VERSION.csv')
 
