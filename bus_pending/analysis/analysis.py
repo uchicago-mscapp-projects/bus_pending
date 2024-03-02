@@ -107,7 +107,8 @@ def calculate_trip_duration(start_time, finish_time):
     duration_trip = finish_time - start_time
     if duration_trip < pd.Timedelta(0):
         duration_trip += pd.Timedelta(seconds=seconds_in_day)
-    return duration_trip
+    total_minutes = duration_trip.total_seconds() / 60
+    return total_minutes
 
 # Create label time (morning, afternoon, night)
 def label_time_interval(time_obs):
