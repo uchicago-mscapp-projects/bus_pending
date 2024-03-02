@@ -68,14 +68,14 @@ concat_subsets = []  # List to store each processed subset
 
 
 def final_observation(df):
-    grouped_sum = df.groupby('group_x')['pdist_x'].transform('max')
+    grouped_sum = df.groupby('group')['pdist'].transform('max')
     df['total_dist'] = grouped_sum 
-    last_values = df.groupby('group_x')['hdg_x'].transform('last')
+    last_values = df.groupby('group')['hdg'].transform('last')
     df['last_value'] = last_values
 
     return df
 
-
+#this loop is to get trip level data for complete trips
 for name, subset in df.groupby(by = 'vid'):
 
     subset_2 = determine_occurrence(subset)
@@ -83,15 +83,24 @@ for name, subset in df.groupby(by = 'vid'):
     #subset.drop('change','group','consective_counts')
     complete_df = determine_occurrence(subset_2[subset_2['error'] == 'complete'])
     #determine_occurrence(subset)
-    merged_df = pd.merge(subset_2, complete_df, on='tmstmp', how='left')
-    pdist_accu = merged_df
-    final_df = final_observation(merged_df)
-    concat_subsets.append(final_df)
-    
-final_dfs = pd.concat(concat_subsets)
-final_dfs.drop(columns=['vid_y',	'lat_y',	'lon_y',	'hdg_y',	'pid_y',	'pdist_y',	'rt_y',	'des_y',	'dly_y',	'tatripid_y',	'tablockid_y',	'zone_y',	'origtatripno_y',	'GroupSize_y',	'status_y'])
+    #merged_df = pd.merge(subset_2, complete_df, on='tmstmp', how='left')
+    final_bus_level = final_observation(complete_df)
+    final_bus_level.sort_values(['group', 'tmstmp'], inplace=True)
+    collapsed_df = final_bus_level.groupby('group').last().reset_index()
 
-final_dfs.to_csv('CONCAT_VERSION.csv')
+    concat_subsets.append(collapsed_df)
+
+
+
+final_dfs = pd.concat(concat_subsets)
+DIRECTION_BOUNDS = ([0, 90,180,270,360], ["North", "East", "South", "West"])
+final_dfs['Direction'] = pd.cut(final_dfs['last_value'], bins = DIRECTION_BOUNDS[0],
+                                     labels=DIRECTION_BOUNDS[1], 
+                                     right=False)
+
+
+final_dfs.reset_index()
+final_dfs.to_csv('trip_level.csv')
 
 
 
