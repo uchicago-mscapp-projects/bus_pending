@@ -1,4 +1,4 @@
-# Analysis 🚌
+# Analysis 📝🚌
 
 ## Scheduled Data
 
@@ -10,7 +10,7 @@ Take data from transit. Join multiple tables in order to have trip_id, service_i
 
 * Calculate trip_duration by subtracting starting_time and finish_time
 
-* Estimate day_time. Morning is defined from 6 am to 12 pm, afternoon from 12 pm to 6 pm, night from 6 pm to 12 am, and midnight from 12 am to 6 am
+* Estimate day_time. Morning is defined from 6 am to 12 pm, afternoon from 12 pm to 6 pm, night from 6 pm to 12 am, and midnight from 12 am to 6 am. Use datetime to parse the string into DeltaTime object
 
 * Group by route, day_time and day. Then, estimate the average trip duration by this groups. For example, how much time, in average, does it take the route 4 on friday afternoon to complete the route?
 
