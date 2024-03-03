@@ -2,20 +2,26 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 from bus_pending.analysis.analysis import analyze_schedule, filename, query_sch
+from typing import Tuple
+import pathlib
 
 final_dfs = pd.read_csv("/Users/danielm/Downloads/trip_level.csv")
-final_dfs = final_dfs[final_dfs['consecutive_counts_y'].notna()]
+final_dfs = final_dfs[final_dfs["consecutive_counts_y"].notna()]
+
+csv_path_stats = pathlib.Path(__file__).parents[2] / "Data/stats_df.csv"
+csv_path_complete = pathlib.Path(__file__).parents[2] / "Data/complete_info.csv"
 
 avg_trip_weekday, avg_trip_weekend = analyze_schedule(filename, query_sch)
 
-def determine_time_data(time_stmp):
+
+def determine_time_data(time_stmp: str) -> Tuple[str, bool]:
     """
     Given a time stamp, determine if the observation was on weekend and the
     time of the day (morning, afternoon, night or midnight)
 
     Inputs:
         time_stamp (str): time stamp with the format %Y%m%d %H:%M
-    
+
     Return:
         day_time (str): time of the day (morning, night, etc)
         weekend (bool): True if it was a weekend and False otherwise
@@ -46,10 +52,6 @@ def determine_time_data(time_stmp):
         day_time = "midnight"
     return day_time, weekend
 
-final_dfs[['day_time', 'weekend']] = final_dfs['tmstmp'].apply(lambda x: pd.Series(determine_time_data(x)))
-
-mean_dist_route = final_dfs.groupby("rt")["total_dist"].mean()
-std_distance_route = final_dfs.groupby("rt")["total_dist"].std()
 
 def find_ghost_buses(observation, mean_dist_route, std_distance_route):
     """
@@ -61,60 +63,87 @@ def find_ghost_buses(observation, mean_dist_route, std_distance_route):
         observation (row): row from a data frame
         mean_dist_route (group object): object grouped by route_id that has the
         average total distance
-    
+
     Return:
         boolean (bool): True if ghost bus False otherwise
     """
-    route = observation['rt']
+    route = observation["rt"]
     total_distance = observation["total_dist"]
     mean_distance = mean_dist_route.get(route, np.nan)
-    
+
     if np.isnan(mean_distance):
         return False
     std_distance = std_distance_route.get(route, np.nan)
     if np.isnan(std_distance):
         return False
-    
-    if (total_distance > mean_distance + 2* std_distance) or (total_distance < mean_distance - 2 * std_distance):
+
+    if (total_distance > mean_distance + 2 * std_distance) or (
+        total_distance < mean_distance - 2 * std_distance
+    ):
         return True
     else:
         return False
-    
 
-def create_df_stats(final_dfs):
-    final_dfs_filtered = final_dfs[final_dfs['delayed_time'] != 20]
+
+def create_df_stats(final_dfs: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
+    """
+    Given the dataframe, create a new dataframe with basic stats by route.
+    Add columns for n delayed buses, percentage delayed, total trips and
+    max delay time by route
+
+    Inputs:
+        final_dfs (DataFrame): DataFrame with all the desired data. User can
+            explore this further if he/she wants to derive different stats
+
+    Return:
+        delayed_df_with_max_delay (DataFrame): DataFrame with basic stats by
+            route
+    """
+    final_dfs_filtered = final_dfs[final_dfs["delayed_time"] != 20]
     # Group by 'rt' and calculate the total number of trips for each group
-    total_trips_rt = final_dfs_filtered.groupby('rt').size()
-
+    total_trips_rt = final_dfs_filtered.groupby("rt").size()
     # Group by 'rt' and calculate the sum of delays for each group
-    n_delayed_rt = final_dfs_filtered.groupby('rt')['delay'].sum()
-
+    n_delayed_rt = final_dfs_filtered.groupby("rt")["delay"].sum()
     # Calculate the percentage of delays for each group relative to total trips
     percentage_delayed_rt = (n_delayed_rt / total_trips_rt) * 100
 
     # Create a new DataFrame with 'rt', 'n_delayed', 'percentage_delayed', and 'total_trips' columns
-    delayed_df = pd.DataFrame({
-        'rt': total_trips_rt.index,
-        'n_delayed': n_delayed_rt.values,
-        'percentage_delayed': percentage_delayed_rt.values,
-        'total_trips': total_trips_rt.values
-    })
+    delayed_df = pd.DataFrame(
+        {
+            "rt": total_trips_rt.index,
+            "n_delayed": n_delayed_rt.values,
+            "percentage_delayed": percentage_delayed_rt.values,
+            "total_trips": total_trips_rt.values,
+        }
+    )
 
     # Sort the DataFrame by 'percentage_delayed' in descending order
-    delayed_df_sorted = delayed_df.sort_values(by='percentage_delayed', ascending=False)
-    max_delayed_time_rt = final_dfs_filtered.groupby('rt')['delayed_time'].max()
+    delayed_df_sorted = delayed_df.sort_values(by="percentage_delayed", ascending=False)
+    max_delayed_time_rt = final_dfs_filtered.groupby("rt")["delayed_time"].max()
 
     # Create a new DataFrame with 'rt' and 'max_delayed_time' columns
-    max_delayed_time_df = pd.DataFrame({
-        'rt': max_delayed_time_rt.index,
-        'max_delayed_time': max_delayed_time_rt.values
-    })
-
+    max_delayed_time_df = pd.DataFrame(
+        {
+            "rt": max_delayed_time_rt.index,
+            "max_delayed_time": max_delayed_time_rt.values,
+        }
+    )
     # Merge with existing DataFrame
-    delayed_df_with_max_delay = delayed_df_sorted.merge(max_delayed_time_df, on='rt')
+    delayed_df_with_max_delay = delayed_df_sorted.merge(max_delayed_time_df, on="rt")
     return delayed_df_with_max_delay
 
-def estimate_delay(df_real_data, avg_trip_weekday, avg_trip_weekend):
+
+def estimate_delay(
+    df_real_data: pd.core.frame.DataFrame, avg_trip_weekday, avg_trip_weekend
+):
+    """
+    Calculate delay time based on schedule time averages by route, day_time
+        and initial split of weekdays and weekends. This will make changes
+        in place
+
+    Input:
+        df_real_data (DataFrame): DataFrame we want to analyze
+    """
     for _, observation in df_real_data.iterrows():
         if observation["weekend"]:
             group = avg_trip_weekend
@@ -136,15 +165,33 @@ def estimate_delay(df_real_data, avg_trip_weekday, avg_trip_weekend):
         else:
             df_real_data.loc[observation.name, "delayed_time"] = 0
 
-def do_analysis(final_dfs):
-    final_dfs[['day_time', 'weekend']] = final_dfs['tmstmp'].apply(lambda x: pd.Series(determine_time_data(x)))
-    final_dfs['ghost'] = final_dfs.apply(lambda x: find_ghost_buses(x, mean_dist_route, std_distance_route), axis=1)
-    desired_columns = ['rt', 'day_time', 'weekend', 'ghost', 'consecutive_counts_y']
+
+def do_analysis(final_dfs: pd.core.frame.DataFrame):
+    """
+    This function does all the analysis. From analyzing schedule data to analyze
+        real data and then compare them to estimate delays. Creates two
+        different csv files with information aboute routes. First file contains
+        all data by route so the user can derive new stats. Second file contains
+        basic stats by route
+
+    Input:
+        final_dfs (DataFrame): dataframe cleaned in cleaning directory
+    """
+    final_dfs[["day_time", "weekend"]] = final_dfs["tmstmp"].apply(
+        lambda x: pd.Series(determine_time_data(x))
+    )
+    mean_dist_route = final_dfs.groupby("rt")["total_dist"].mean()
+    std_distance_route = final_dfs.groupby("rt")["total_dist"].std()
+    final_dfs["ghost"] = final_dfs.apply(
+        lambda x: find_ghost_buses(x, mean_dist_route, std_distance_route), axis=1
+    )
+    desired_columns = ["rt", "day_time", "weekend", "ghost", "consecutive_counts_y"]
     final_dfs = final_dfs[desired_columns]
     estimate_delay(final_dfs, avg_trip_weekday, avg_trip_weekend)
-    final_dfs['delay'] = final_dfs['delayed_time'].apply(lambda x: 1 if x > 0 else 0)
-    final_dfs.to_csv("/Users/danielm/Documents/UChicago/Harris/Computer_Science_2/bus_pending/Data/complete_info")
+    final_dfs["delay"] = final_dfs["delayed_time"].apply(lambda x: 1 if x > 0 else 0)
+    final_dfs.to_csv(csv_path_complete)
     df_stats = create_df_stats(final_dfs)
-    df_stats.to_csv("/Users/danielm/Documents/UChicago/Harris/Computer_Science_2/bus_pending/Data/stats_df")
+    df_stats.to_csv(csv_path_stats)
+
 
 do_analysis(final_dfs)

@@ -1,10 +1,13 @@
 import pandas as pd
-import numpy as np
 import sqlite3
 from datetime import datetime
 import re
+import pathlib
+from typing import NewType
 
-filename = "/Users/danielm/Downloads/buses_static_2024-02-29.db"
+
+filename = pathlib.Path(__file__).parents[2] / "Data/buses_static_2024-02-29.db"
+
 query_sch = """
 SELECT schedule.*, trips.route_id, trips.direction, calendar.*
 FROM schedule
@@ -15,7 +18,7 @@ ORDER BY schedule.arrival_time;
 seconds_in_day = 86400
 
 
-def analyze_schedule(filename, query_sch):
+def analyze_schedule(filename: str, query_sch: str) -> pd.core.frame.DataFrame:
     """
     Determine if the schedule is for weekday, weekend or both. Filter data to
     keep only the first and last observation. This function will make two
@@ -26,8 +29,9 @@ def analyze_schedule(filename, query_sch):
         query_sch (str): query to obtain and sort the data from schedule tables
 
     Return:
-        avg_trip_weekend (group): average trip duration on weekends. Grouped by
+        avg_trip_weekend (GroupBy): average trip duration on weekends. Grouped by
             route and time_day (ie morning, afternoon, night and midnight)
+        avg_trip_weekday (GroupBy)
     """
     df_schedule = query_schedule(filename, query_sch)
     # If service_id has schedules on saturday or sunday, weekend equal True
@@ -56,7 +60,7 @@ def analyze_schedule(filename, query_sch):
     return avg_trip_weekend, avg_trip_weekday
 
 
-def query_schedule(filename, query):
+def query_schedule(filename: str, query: str):
     # Connect to the SQLite database
     conn = sqlite3.connect(filename)
     # Fetch the data into a pandas DataFrame
@@ -65,7 +69,7 @@ def query_schedule(filename, query):
     return df_schedule
 
 
-def keep_last_and_first(filtered_df):
+def keep_last_and_first(filtered_df: pd.core.frame.DataFrame):
     """
     Dataframe has the same trip_id in multiple columns. We only want to analyze
     the time at the starting point and the time at the end of the trip. Clean
@@ -120,7 +124,7 @@ def keep_last_and_first(filtered_df):
 
 
 # Clean time data. Go from string to time
-def clean_time(time_str):
+def clean_time(time_str: str) -> datetime:
     """
     Some observations registered 24 and 25 hours, we have to fix it before
     making it time object. Go from string to time
@@ -131,7 +135,7 @@ def clean_time(time_str):
     return datetime.strptime(time_str, "%H:%M:%S")
 
 
-def calculate_trip_duration(start_time, finish_time):
+def calculate_trip_duration(start_time: datetime, finish_time: datetime) -> float:
     """
     Take column finish time and start time and estimate the duration trip.
     Return the total seconds it took. Given to data cleaning requirements, some
@@ -144,7 +148,7 @@ def calculate_trip_duration(start_time, finish_time):
         finish_time (datetime): finish time of the bus trip
 
     Return:
-        duration_trip (Timedelta): trip duration
+        duration_trip (float): trip duration in minutes
     """
     # Create duration_trip
     duration_trip = finish_time - start_time
@@ -154,13 +158,12 @@ def calculate_trip_duration(start_time, finish_time):
     return total_minutes
 
 
-# Create label time (morning, afternoon, night)
-def label_time_interval(time_obs):
+def label_time_interval(time_obs: str) -> str:
     """
     Given different thresholds, label the time the trip started
 
     Inputs:
-        time_obs: time object represented as %H:%M:%S
+        time_obs (str): time object represented as %H:%M:%S
 
     Return:
         label (str): can be moring, afternoon or night
@@ -181,6 +184,3 @@ def label_time_interval(time_obs):
         return "night"
     else:
         return "midnight"
-
-
-avg_trip_weekend, avg_trip_weekday = analyze_schedule(filename, query_sch)
