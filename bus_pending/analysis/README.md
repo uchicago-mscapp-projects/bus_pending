@@ -26,4 +26,6 @@ Take data from transit. Join multiple tables in order to have trip_id, service_i
 
 * Delay time is the actual time minus the expected time. If delay time is less than 10 minutes, then do not label the observation as "delayed" and do not count the time as "delayed time"
 
+* Drop routes where average delayed time is equal to 20 minutes. That route has undesired behavior if all the delays are ghost buses
+
 * Do a new data frame with all the information
