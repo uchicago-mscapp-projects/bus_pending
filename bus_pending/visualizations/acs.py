@@ -12,38 +12,25 @@ Got help from:
 https://medium.com/@mcmanus_data_works/using-the-u-s-census-bureau-api-with-python-5c30ad34dbd7
 """
 
-import requests
-# from .acs_key import ACS_KEY
 import pandas as pd
 import numpy as np
 from skimpy import clean_columns
 
-def make_acs_request(year = 2022, variables = ["Name", "B19113_001E"], geography_code = [], api_key = ""): 
+
+def clean_income_data(file, year):
     """
-    Build url to make ACS request from the API. 
-    """
-    
-    # Declare API key from package
-    if ACS_KEY: 
-        api_key = ACS_KEY
+    Takes income data from ACS tables and aggregates it by zipcode in a format
+    that easily readable by plotly. 
 
+    The desaggregation for the ACS tables is: zip code, income. 
 
-    # Define url parameters    
-    host = "https://api.census.gov/data/"
-    table = "acs/acs1"
-    get  = "get="
-    vars = ",".join(variables)
-    geo  = "&for=" + geography_code
-    key  = "&key=" + api_key
-    
-    # Paste in a single query url
-    url_query = host + table + year + get + vars + geo + key 
+    Args: 
+        - file (str): Common path were the files are stored 
+        - year (int): the year to be processed 
 
-    return url_query
-
-
-
-def clean_income_data(file, year): 
+    Returns (pandas data frame): a data frame with income data by zip code 
+    by year. 
+    """ 
     # Open file 
     file = open(file + str(year) + ".csv")
     df_income_raw = pd.read_csv(file)
@@ -82,6 +69,15 @@ def clean_income_data(file, year):
 
 
 def write_income_series(min_year = 2018, max_year = 2022): 
+    """
+    Build panel data on income by zip code. 
+
+    Args: 
+        - min_year (int): Starting year for the series 
+        - max_year (int): Ending year for the series 
+
+    Returns: No returns, but instead it writes the clean acs data. 
+    """
     df_income_zip_code_series = pd.DataFrame()
 
     for year in range(min_year, max_year + 1):
