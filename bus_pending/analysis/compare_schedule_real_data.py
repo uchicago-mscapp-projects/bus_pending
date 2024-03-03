@@ -15,6 +15,7 @@ seconds_in_day = 86400
 
 final_dfs = pd.read_csv("/Users/danielm/Downloads/trip_level.csv")
 avg_trip_weekend, avg_trip_weekday = analyze_schedule(filename, query_sch)
+final_dfs = do_analysis(final_dfs)
 
 
 def estimate_delay(df_real_data, avg_trip_weekday, avg_trip_weekend):
