@@ -4,7 +4,7 @@ import sqlite3
 from datetime import datetime
 import re
 
-filename = '/Users/danielm/Downloads/buses_static_2024-02-29.db'
+filename = "/Users/danielm/Downloads/buses_static_2024-02-29.db"
 query_sch = """
 SELECT schedule.*, trips.route_id, trips.direction, calendar.*
 FROM schedule
@@ -31,16 +31,27 @@ def analyze_schedule(filename, query_sch):
     """
     df_schedule = query_schedule(filename, query_sch)
     # If service_id has schedules on saturday or sunday, weekend equal True
-    df_schedule['weekday'] = df_schedule[['monday', 'tuesday', 'wednesday', 'thursday', 'friday']].any(axis=1)
-    df_schedule['weekend'] = df_schedule[['saturday', 'sunday']].any(axis=1)
+    df_schedule["weekday"] = df_schedule[
+        ["monday", "tuesday", "wednesday", "thursday", "friday"]
+    ].any(axis=1)
+    df_schedule["weekend"] = df_schedule[["saturday", "sunday"]].any(axis=1)
 
     transformed_df = keep_last_and_first(df_schedule)
-    transformed_df[['start_time', 'finish_time']] = transformed_df[['start_time', 'finish_time']].applymap(clean_time)
+    transformed_df[["start_time", "finish_time"]] = transformed_df[
+        ["start_time", "finish_time"]
+    ].applymap(clean_time)
     # Create duration_trip
-    transformed_df['duration_trip'] = transformed_df.apply(lambda row: calculate_trip_duration(row['start_time'], row['finish_time']), axis=1)
+    transformed_df["duration_trip"] = transformed_df.apply(
+        lambda row: calculate_trip_duration(row["start_time"], row["finish_time"]),
+        axis=1,
+    )
     transformed_df["day_time"] = transformed_df["start_time"].apply(label_time_interval)
-    avg_trip_weekday = transformed_df.groupby(['weekday', 'route_id', 'day_time'])['duration_trip'].mean()
-    avg_trip_weekend = transformed_df.groupby(['weekend', 'route_id', 'day_time'])['duration_trip'].mean()
+    avg_trip_weekday = transformed_df.groupby(["weekday", "route_id", "day_time"])[
+        "duration_trip"
+    ].mean()
+    avg_trip_weekend = transformed_df.groupby(["weekend", "route_id", "day_time"])[
+        "duration_trip"
+    ].mean()
 
     return avg_trip_weekend, avg_trip_weekday
 
@@ -52,7 +63,6 @@ def query_schedule(filename, query):
     df_schedule = pd.read_sql_query(query, conn)
     conn.close()
     return df_schedule
-    
 
 
 def keep_last_and_first(filtered_df):
@@ -61,26 +71,50 @@ def keep_last_and_first(filtered_df):
     the time at the starting point and the time at the end of the trip. Clean
     the dataframe so it only includes the first and last observation per trip_id.
     This is possible because the query sorted the trips by arrival_time
-    
+
     Inputs:
         filtered_df (dataframe): dataframe that already has the days that service
             is provided
-    
+
     Return:
         transformed_df (dataframe): dataframe that only has the first and
             last observation of every trip_id
     """
     # Group by 'trip_id' and select the first and last observations
-    first_last_obs = filtered_df.groupby('trip_id').agg(['first', 'last'])
+    first_last_obs = filtered_df.groupby("trip_id").agg(["first", "last"])
     # Reset index to make 'trip_id' a regular column
     first_last_obs.reset_index(inplace=True)
     # Concatenate the 'trip_id', first, and last observations. All rows, starting from col 1 step size of two
-    selected_obs = pd.concat([first_last_obs['trip_id'], first_last_obs.iloc[:, 1::2], first_last_obs.iloc[:, 2::2]], axis=1)
-    transformed_df = selected_obs[['trip_id', ('weekday', 'first'), ('weekend', 'first'), ('arrival_time', 'first'), ('stop_id', 'first'), ('route_id', 'first'),('arrival_time', 'last')]]
+    selected_obs = pd.concat(
+        [
+            first_last_obs["trip_id"],
+            first_last_obs.iloc[:, 1::2],
+            first_last_obs.iloc[:, 2::2],
+        ],
+        axis=1,
+    )
+    transformed_df = selected_obs[
+        [
+            "trip_id",
+            ("weekday", "first"),
+            ("weekend", "first"),
+            ("arrival_time", "first"),
+            ("stop_id", "first"),
+            ("route_id", "first"),
+            ("arrival_time", "last"),
+        ]
+    ]
     transformed_df.reset_index(drop=True, inplace=True)
     # Clean column names
-    mapping = {'trip_id': 'trip_id', ('weekday', 'first'): 'weekday', ('weekend', 'first'): 'weekend', ('arrival_time', 'first'): 'start_time', ('stop_id', 'first'): 'stop_id',
-            ('route_id', 'first'):'route_id', ('arrival_time', 'last'): 'finish_time'}
+    mapping = {
+        "trip_id": "trip_id",
+        ("weekday", "first"): "weekday",
+        ("weekend", "first"): "weekend",
+        ("arrival_time", "first"): "start_time",
+        ("stop_id", "first"): "stop_id",
+        ("route_id", "first"): "route_id",
+        ("arrival_time", "last"): "finish_time",
+    }
     transformed_df = transformed_df.rename(mapping, axis=1)
     return transformed_df
 
@@ -92,16 +126,17 @@ def clean_time(time_str):
     making it time object. Go from string to time
     """
     # Parse time string into a datetime object
-    time_str = re.sub(r'^24', '00', time_str)
-    time_str = re.sub(r'^25', '01', time_str)
-    return datetime.strptime(time_str, '%H:%M:%S')
+    time_str = re.sub(r"^24", "00", time_str)
+    time_str = re.sub(r"^25", "01", time_str)
+    return datetime.strptime(time_str, "%H:%M:%S")
+
 
 def calculate_trip_duration(start_time, finish_time):
     """
     Take column finish time and start time and estimate the duration trip.
     Return the total seconds it took. Given to data cleaning requirements, some
     observations may have negative values: we have to add the total seconds of
-    one day (it happened with observations that began late in the night and 
+    one day (it happened with observations that began late in the night and
     finished the next day)
 
     Inputs:
@@ -117,6 +152,7 @@ def calculate_trip_duration(start_time, finish_time):
         duration_trip += pd.Timedelta(seconds=seconds_in_day)
     total_minutes = duration_trip.total_seconds() / 60
     return total_minutes
+
 
 # Create label time (morning, afternoon, night)
 def label_time_interval(time_obs):
@@ -145,5 +181,6 @@ def label_time_interval(time_obs):
         return "night"
     else:
         return "midnight"
-    
+
+
 avg_trip_weekend, avg_trip_weekday = analyze_schedule(filename, query_sch)

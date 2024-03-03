@@ -4,7 +4,6 @@ from bus_pending.analysis.analysis import keep_last_and_first, calculate_trip_du
 
 # Values to test keep last and first function
 columns_keep = ["trip_id", "weekday", "weekend", "arrival_time", "stop_id", "route_id"]
-columns_results = ["trip_id", "weekday", "weekend", "arrival_time", "stop_id", "route_id"]
 
 data_keep = [["350", True, False, "12:00:00", "fake_stop", "disney"],
              ["999", True, False, "15:00:00", "fake_stop2", "Uchicago"],
@@ -21,13 +20,9 @@ data_keep = [["350", True, False, "12:00:00", "fake_stop", "disney"],
              ["350", True, False, "13:00:00", "fake_stop", "disney"],
              ["999", True, False, "16:40:00", "fake_stop2", "Uchicago"]]
 
-data_results_keep = [["350", True, False, "12:00:00", "fake_stop", "disney", "13:00:00"],
-                     ["999", True, False, "15:00:00", "fake_stop2", "Uchicago", "16:40:00"],
-                     ["102", False, True, "16:00:00", "fake_stop3", "Loop", "17:00:00"]]
 
 
 df_keep = pd.DataFrame(data_keep, columns= columns_keep)
-results_keep = pd.DataFrame(data_results_keep, columns = columns_keep+["finish_time"])
 
 # Values to test calculate trip duration
 simple_case = pd.Timedelta(hours=4, minutes=30).total_seconds() / 60
