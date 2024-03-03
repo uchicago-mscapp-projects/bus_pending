@@ -2,26 +2,45 @@ import pandas as pd
 import sqlite3
 import pyarrow
 import numpy as np
-pd.set_option('display.max_rows', None)
-pd.set_option('display.max_columns', None)
+import pathlib
 
+#scraped_filename = pathlib.Path(__file__).parent.parent/"data/buses_static_2024-02-29.db"
 
+def import_data(filename):
 
-conn = sqlite3.connect('/Users/kelingsdatabase/Documents/CS122 Project/buses_static_2024-02-29.db')
-query = "SELECT * FROM buses WHERE tmstmp > '20240220 23:59'"
-df = pd.read_sql_query(query, conn)
+    """
+    read our database into a Pandas dataframe
 
-conn.close()
+    Input(str):
+        filename: path of the file
+    Output(Pandas dataframe):
+        df: raw data frame from scraped data file
+    """
+    # import data from database
+    conn = sqlite3.connect(filename)
+    # for consistency of the raw data, we use data from 20240221 00:00
+    query = "SELECT * FROM buses WHERE tmstmp > '20240220 23:59'"
+    df = pd.read_sql_query(query, conn)
+    conn.close()
 
-## intitial filterings
+    return df
 
 def ghostbuses(df):
+
     """
-    count the # of observations for each bus
-    if # =1 defined as ghost bus
-    and set the pdist to 0
-    this is an in-place modification
+    If a bus only appears in the data frame for one minute, we
+    consider it as a ghost bus that lost GPS connection.
+
+    Count the # of observations for each bus.
+    If # =1, 'status' of this bus would be 'ghost'.
+    Set the 'pdist' of the bus to 0
+
+    Input(Pandas dataframe): 
+        df: Scraped raw dataframe
+    Output(Pandas dataframe): 
+        df: Dataframe with a column specifying the status of the bus
     """
+
     df = df.copy()
     df['GroupSize'] = df.groupby('vid')['vid'].transform('count')
     df['status'] = np.where(df['GroupSize'] == 1, 'Ghost', pd.NA)
@@ -29,18 +48,31 @@ def ghostbuses(df):
 
     return df
 
-df = ghostbuses(df)
-
 
 def determine_occurrence(subset):
 
     """
-    count how many minutes this bus has run in this trip
-    this function is designed to modify df in place!!
+    If the bus changes its direction from last minute, 
+    we consider it as finishing this trip and beginning next trip.
+
+    We try to get how many consective rows a bus has run towards the same destination, 
+    before changing destination.
+    The value of consective_counts is considered to be the number of observations of this
+    trip of this bus(vid).
+
+    Input(Pandas dataframe): 
+        subset: vid-tmstmp data labled with whether it's a ghost bus or not in the status
+    Output(Pandas dataframe): 
+        final_df: vid-tmstmp data with status and consecutive_counts
     """
+
     subset = subset.copy()
+    # check if this row's destination is the same as last row
+    # (i.e.whether this bus changes destination in this minute.)
     subset['change'] = subset['des'] != subset['des'].shift()
+    # rows with the same group number of this vehicle means those are data points of the same trip
     subset['group'] = subset['change'].cumsum()
+    # number of consective rows before the bus enter the next trip
     consecutive_counts = subset.groupby('group').size()
     counts_df = consecutive_counts.reset_index(name='consecutive_counts').set_index('group')
     final_df = pd.merge(subset, counts_df, left_on='group', right_index=True, how='left')
@@ -51,23 +83,46 @@ def determine_occurrence(subset):
 def error_dealing(subset):
 
     """
-    1.if it's the first few minutes or last few minutes of this bus, lable as middle_cut
-    else: 2.if appeared less than 10 minutes in df, lable as error
-    """
-    trip_sequence = list(set(subset['group'].values.tolist()))
+    In our scraping data, there are buses that are in the middle of trips when our scraping begins
+    and buses that did not finish trips when our scraping ends. We consider those rows as 'middle cuts'.
 
-    #then we filter out top and bottom rows
+    There are also rows that have the same destination for less than 10 minutes. We consider this to be 
+    a kind of misoperation by the bus driver. We lable those rows as 'misoperation'.
+
+    Other rows will be labeled as 'complete'.
+
+    In our analysis, we only include data that represents a bus running a complete journey
+
+    Input(Pandas dataframe): 
+        subset: dataframe with consective_counts data
+    Output(Pandas dataframe): 
+        subset: dataframe with error type of the bus 
+    """
+
+    trip_sequence = list(set(subset['group'].values.tolist()))
+    # first we filter out top and bottom rows
     subset['error']=np.where(subset['group'].isin(trip_sequence[1:-1:1]),'complete', 
                              'middle_cut')
+    # then we deal with the rest
     condition = subset['error'] == 'complete'
-    subset.loc[condition, 'error'] = np.where(subset.loc[condition, 'consecutive_counts'] <= 10, 'error', 'complete')
+    subset.loc[condition, 'error'] = np.where(subset.loc[condition, 'consecutive_counts'] <= 10, 'misoperation', 'complete')
+    
     return subset
 
 
-concat_subsets = []  # List to store each processed subset
-
-
 def final_observation(df):
+
+    """
+    To map with scheduled data, we take the last observation of one trip of a bus, and return its direction.
+    We also get the total distance the bus has run in this trip to double-check if the trip has errors in Analysis
+    part.
+
+    Input(Pandas dataframe): 
+        df: dataframe with group index
+    Output(Pandas dataframe):
+        df: dataframe with columns specifying the directiona and total distance at the last obervation of the trip
+    """
+
     grouped_sum = df.groupby('group')['pdist'].transform('max')
     df['total_dist'] = grouped_sum 
     last_values = df.groupby('group')['hdg'].transform('last')
@@ -75,32 +130,59 @@ def final_observation(df):
 
     return df
 
-#this loop is to get trip level data for complete trips
-for name, subset in df.groupby(by = 'vid'):
+def turn_degree_to_dir(df):
 
-    subset_2 = determine_occurrence(subset)
-    error_dealing(subset_2)
-    #subset.drop('change','group','consective_counts')
-    complete_df = determine_occurrence(subset_2[subset_2['error'] == 'complete'])
-    #determine_occurrence(subset)
-    #merged_df = pd.merge(subset_2, complete_df, on='tmstmp', how='left')
-    final_bus_level = final_observation(complete_df)
-    final_bus_level.sort_values(['group', 'tmstmp'], inplace=True)
-    collapsed_df = final_bus_level.groupby('group').last().reset_index()
+    """
+    Turn numerical degree for direction into string-type direction.
 
-    concat_subsets.append(collapsed_df)
+    Input(Pandas dataframe):
+        df: dataframe with a column specifying the degree direction of the bus
+    Output(Pandas dataframe):
+        df: dataframe with a column specifying direction: N, E, S, W
+    """
 
-
-
-final_dfs = pd.concat(concat_subsets)
-DIRECTION_BOUNDS = ([0, 90,180,270,360], ["North", "East", "South", "West"])
-final_dfs['Direction'] = pd.cut(final_dfs['last_value'], bins = DIRECTION_BOUNDS[0],
+    DIRECTION_BOUNDS = ([0, 90,180,270,360], ["North", "East", "South", "West"])
+    df['direction'] = pd.cut(df['last_value'], bins = DIRECTION_BOUNDS[0],
                                      labels=DIRECTION_BOUNDS[1], 
                                      right=False)
+    
+    return df
 
 
-final_dfs.reset_index()
-final_dfs.to_csv('trip_level.csv')
+def create_duration_df(filename):
+
+    """
+    This function is used to create a restricted sample of trip-time level data
+
+    Input(str):
+        filename:path of the scraped data
+    Output(None)
+        this function will write trip-time level dataframe into a csv and put it under data folder 
+    """
+
+    df = import_data(filename)
+    df = ghostbuses(df)
+    concat_subsets = []
+    for name, subset in df.groupby(by = 'vid'):
+        subset.sort_values(by = 'tmstmp')
+        subset = determine_occurrence(subset)
+        subset = error_dealing(subset)
+        complete_subset = determine_occurrence(subset[subset['error'] == 'complete'])
+        final_bus_level = final_observation(complete_subset)
+        final_bus_level.sort_values(['group', 'tmstmp'], inplace=True)
+        collapsed_df = final_bus_level.groupby('group').last().reset_index()
+        concat_subsets.append(collapsed_df)
+    final_dfs = pd.concat(concat_subsets)
+    final_dfs = turn_degree_to_dir(final_dfs)
+    final_dfs.drop(final_dfs.columns[1], axis=1,inplace=True)
+    final_dfs = final_dfs.reset_index(drop=True)
+
+    final_dfs.to_csv(pathlib.Path(__file__).parent.parent/'data/trip_time_level.csv')
+    return
+
+def create_error_summary(filename)
+
+#create_duration_df(scraped_filename)
 
 
 
@@ -109,158 +191,7 @@ final_dfs.to_csv('trip_level.csv')
 
 
 
-# def update_des_recursive(df):
-#     # Calculate 'change', 'group', and 'consecutive_counts'
-#     subset = determine_occurrence(df)
+
 
     
-#     # Update 'des' where 'consecutive_counts' is less than 15
-#     mask = subset['consecutive_counts'] <= 10
-#     for i in df[mask].index:
-#         # Find the next different 'des' value from the row above
-#         next_diff_des = df.loc[i+1:, 'des'].loc[lambda x: x != df.loc[i, 'des']].head(1).values
-#         if len(next_diff_des) > 0:
-#             df.at[i, 'des'] = next_diff_des[0]
     
-#     # Recalculate 'change', 'group', and 'consecutive_counts' after the update
-#     subset = determine_occurrence(subset)
-    
-#     # Check if there's any 'consecutive_counts' less than or equal to 15
-#     if df['consecutive_counts'].le(15).any():
-#         # Recursion if there's any count less than or equal to 15
-#         return update_des_recursive(df)
-#     else:
-#         # Drop temporary columns if needed
-#         df.drop(['change', 'group'], axis=1, inplace=True)
-#         return determine_occurrence(df)
-
-
-
-
-
-    
-    
-
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# print(sorted_df.head(100))
-# subset_vid = sorted_df.groupby(by = 'vid')
-# for bus,subset in subset_vid:
-#     print(f"Group name: {bus}")
-#     print(subset)
-#     break
-
-
-"""
-count report time of each vehicle
-"""
-# df['GroupSize'] = df.groupby('vid')['vid'].transform('count')
-# print(df.head())
-# Q1 = df['GroupSize'].quantile(0.1)
-# #Q3 = df['GroupSize'].quantile(0.75)
-# print(Q1)
-#df['pdist'] = pd.to_numeric(df['pdist'], errors='coerce')
-
-# lst = []
-# pattern_counts = df.groupby('vid')['pid'].nunique().reset_index(name='num_patterns')
-# for _,row in pattern_counts.iterrows():
-#      if row['num_patterns'] != 2:
-#           lst.append(row['vid'])
-# #print(df[df['vid'].isin(lst)])
-# print(df[df['vid'] == 8290])
-#lst = []
-#vehicles_2_routes = []
-
-
-# rt_counts = df.groupby('vid')['rt'].nunique().reset_index(name='num_routes')
-# ct = 0 
-# for _,row in rt_counts.iterrows():
-#      if row['num_routes'] != 1:
-#           print(row)
-#           ct +=1
-#           lst.append(row['vid'])
-#           vehicles_2_routes.append(row['vid'])
-# print(df[df['vid'] == 8328])
-# print(ct)
-# print(df[df['vid'].isin(lst)].shape)
-# df_droute = df[df['vid'] == 8328]
-# sorted_df = df_droute.sort_values(by=['vid', 'tmstmp'])
-# print(sorted_df.head(100))
-
-
-
-
-
-
-# Display the result
-#print(pattern_counts)
-
-
-
-
-# aggregated = df.groupby('rt').agg(
-#     smallest_pdist=('pdist', 'min'),
-#     largest_pdist=('pdist', 'max')
-# ).reset_index()
-
-# # Step 2: Merge back with the original df to flag the smallest and largest pdist occurrences
-# merged_df = df.merge(aggregated, on='rt')
-
-# # Flag rows with smallest and largest pdist for each rt
-# merged_df['is_smallest_pdist'] = merged_df['pdist'] == merged_df['smallest_pdist']
-# merged_df['is_largest_pdist'] = merged_df['pdist'] == merged_df['largest_pdist']
-
-# # Step 3: Count occurrences
-# # Count how many times the smallest and largest pdist have shown up for each route
-# count_smallest = merged_df.groupby('rt')['is_smallest_pdist'].sum().reset_index(name='count_smallest_pdist')
-# count_largest = merged_df.groupby('rt')['is_largest_pdist'].sum().reset_index(name='count_largest_pdist')
-
-# # Merge the counts back with the aggregated DataFrame
-# final_result = aggregated.merge(count_smallest, on='rt').merge(count_largest, on='rt')
-
-# # Display the final DataFrame
-# pd.set_option('display.max_rows', None)  # Optional: to display all rows
-# print(final_result)
-
-# print(df['rt'].unique())
-# print(df[df['rt'] == '3']['pdist'])
-
-
-# result = df.groupby('rt').agg(
-#     smallest_pdist=('pdist', 'min'),
-#     largest_pdist=('pdist', 'max'),
-    
-# ).reset_index()
-# pd.set_option('display.max_rows', None)
-# print(result)
-
-# for _,row in df.iterrows():
-#     if row['pdist'] == 1:
-#         print(row)
-
-#print(df.shape)
-#for index, row in df.iterrows():
-    # Access column values using row['ColumnName']
-    #if type(row['pdist']) != int:
-        #print(row['pdist'])
-
-# df_103 = df[df['rt'] == '103']
-# sorted_df = df_103.sort_values(by=['vid', 'tmstmp'])
-# print(sorted_df)
