@@ -18,10 +18,12 @@ Take data from transit. Join multiple tables in order to have trip_id, service_i
 
 ## Real Data
 
-* Transform the time stamp to DeltaTime and then estimate the day_time and week day
+* Transform the time stamp to DeltaTime and then estimate the day_time and label them as weekday or weekend (they can be both since there aere service days that runs every day)
 
 * Take the average distance by route. If the observation has less than two standard deviations from the mean then label it as "ghost". Impute a delay of 30 minutes to that route
 
-* Count number of ghosts, this is the current number of delays per route. Drop those observations to do the final analysis
+* Delete observations with characteristics not found in scheduled data. Transit does not have complete schedules
 
-* Compare real trip_duration to the group object data to estimate the delay time. If the schedule data indicates that route in fridays morning should take 1 hour but it took 5 minutes, add 5 minutes to delay time. If delay time is greater than 10 minutes increased current number of delays by 1
+* Delay time is the actual time minus the expected time. If delay time is less than 10 minutes, then do not label the observation as "delayed" and do not count the time as "delayed time"
+
+* Do a new data frame with all the information
