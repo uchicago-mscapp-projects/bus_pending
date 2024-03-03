@@ -1,8 +1,9 @@
+import pathlib
 import requests
 
 from scraping.scrape_buses import get_stored_data
 
-def get_routes(file = "routes.txt"):
+def get_routes(file):
     '''
     Queries if the CTA bustracker API and saves a local version of the routes 
     file.
@@ -14,7 +15,8 @@ def get_routes(file = "routes.txt"):
         string in the main directory.
     '''
     # Get key
-    key = get_stored_data(".apikey", 'key')
+    keypath = pathlib.Path(__file__).parents[2] / '.apikey'
+    key = get_stored_data(keypath, 'key')
 
     # Store API elements
     url = "http://ctabustracker.com/bustime/api/"

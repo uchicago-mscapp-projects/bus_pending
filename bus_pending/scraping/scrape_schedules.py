@@ -44,12 +44,13 @@ def download_file(url, file):
     Returns (none): Saved file in place
     '''
     request = requests.get(f'{url}{file}')
-    with open(pathlib.Path(f'data/{file}'), 'wb') as f:
+    data_path = pathlib.Path(__file__).parents[2] / 'data/' 
+    with open(f'{data_path}/{file}', 'wb') as f:
         f.write(request.content)
 
     # Unzip file
     # from https://stackoverflow.com/a/36662770
-    with zipfile.ZipFile(f'data/{file}', 'r') as zip_ref:
+    with zipfile.ZipFile(f'{data_path}/{file}', 'r') as zip_ref:
         zip_ref.extractall('data/')
 
     return None
@@ -67,7 +68,8 @@ def load_txt_as_csv(file):
 
     Returns (list of Lits): List of dataframe elements to write into DB
     '''
-    df = pd.read_csv(pathlib.Path(f'data/{file}'))
+    data_path = pathlib.Path(__file__).parents[2] / 'data/' 
+    df = pd.read_csv(f'{data_path}/{file}')
     return df.to_dict('records')
 
 
@@ -82,10 +84,12 @@ def scrape():
     '''
     # Download files
     download_file(URL, ZIP)
+    db_path = pathlib.Path(__file__).parents[2] / 'data/buses.db'
 
     # Load
     for file, names, table in TO_CLEAN:
+        print(f'Creating schedule database elements: {table}')
         lst = load_txt_as_csv(file)
 
         # Save them to the buses.db database
-        save_request(lst, 'data/buses.db', f'{table}', names) 
+        save_request(lst, db_path, f'{table}', names) 
