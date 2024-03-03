@@ -16,25 +16,33 @@ seconds_in_day = 86400
 
 
 def analyze_schedule(filename, query_sch):
+    """
+    Determine if the schedule is for weekday, weekend or both. Filter data to
+    keep only the first and last observation. This function will make two
+    group objects to compare them with real data observations
+
+    Inputs:
+        filename (str): path of the file
+        query_sch (str): query to obtain and sort the data from schedule tables
+
+    Return:
+        avg_trip_weekend (group): average trip duration on weekends. Grouped by
+            route and time_day (ie morning, afternoon, night and midnight)
+    """
     df_schedule = query_schedule(filename, query_sch)
     # Convert multiple boolean variables into one. Also duplicates a row, but the label will be different(monday, tuesday, etc)
-    melted_df = pd.melt(df_schedule, id_vars=['trip_id', 'arrival_time', 'stop_id', 'route_id'], 
-                        value_vars=['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'], 
-                        var_name='day', value_name='runs')
-    # Keep only observations where the service_id is run in that day
-    filtered_df = melted_df[melted_df['runs'] == 1]
-    transformed_df = keep_last_and_first(filtered_df)
+    df_schedule['weekday'] = df_schedule[['monday', 'tuesday', 'wednesday', 'thursday', 'friday']].any(axis=1)
+    df_schedule['weekend'] = df_schedule[['saturday', 'sunday']].any(axis=1)
+
+    transformed_df = keep_last_and_first(df_schedule)
     transformed_df[['start_time', 'finish_time']] = transformed_df[['start_time', 'finish_time']].applymap(clean_time)
     # Create duration_trip
     transformed_df['duration_trip'] = transformed_df.apply(lambda row: calculate_trip_duration(row['start_time'], row['finish_time']), axis=1)
     transformed_df["day_time"] = transformed_df["start_time"].apply(label_time_interval)
-    average_trip_duration = transformed_df.groupby(['day', 'route_id', 'day_time'])['duration_trip'].mean()
+    avg_trip_weekday = transformed_df.groupby(['weekday', 'route_id', 'day_time'])['duration_trip'].mean()
+    avg_trip_weekend = transformed_df.groupby(['weekend', 'route_id', 'day_time'])['duration_trip'].mean()
 
-    # Now calculate the average difference of start times inside groups
-    transformed_df_sorted = transformed_df.sort_values(by=['route_id', 'day_time', 'start_time'])
-    transformed_df_sorted['start_time_diff'] = transformed_df_sorted.groupby(['day', 'route_id', 'day_time'])['start_time'].diff()
-    average_start_time_diff = transformed_df_sorted.groupby(['day', 'route_id', 'day_time'])['start_time_diff'].mean()
-    return average_start_time_diff, average_trip_duration
+    return avg_trip_weekend, avg_trip_weekday
 
 
 def query_schedule(filename, query):
@@ -68,10 +76,10 @@ def keep_last_and_first(filtered_df):
     first_last_obs.reset_index(inplace=True)
     # Concatenate the 'trip_id', first, and last observations. All rows, starting from col 1 step size of two
     selected_obs = pd.concat([first_last_obs['trip_id'], first_last_obs.iloc[:, 1::2], first_last_obs.iloc[:, 2::2]], axis=1)
-    transformed_df = selected_obs[['trip_id', ('day', 'first'),('arrival_time', 'first'), ('stop_id', 'first'), ('route_id', 'first'),('arrival_time', 'last')]]
+    transformed_df = selected_obs[['trip_id', ('weekday', 'first'), ('weekend', 'first'), ('arrival_time', 'first'), ('stop_id', 'first'), ('route_id', 'first'),('arrival_time', 'last')]]
     transformed_df.reset_index(drop=True, inplace=True)
     # Clean column names
-    mapping = {'trip_id': 'trip_id', ('day', 'first'): 'day', ('arrival_time', 'first'): 'start_time', ('stop_id', 'first'): 'stop_id',
+    mapping = {'trip_id': 'trip_id', ('weekday', 'first'): 'weekday', ('weekend', 'first'): 'weekend', ('arrival_time', 'first'): 'start_time', ('stop_id', 'first'): 'stop_id',
             ('route_id', 'first'):'route_id', ('arrival_time', 'last'): 'finish_time'}
     transformed_df = transformed_df.rename(mapping, axis=1)
     return transformed_df
@@ -138,4 +146,4 @@ def label_time_interval(time_obs):
     else:
         return "midnight"
     
-average_start_time_diff, average_trip_duration = analyze_schedule(filename, query_sch)
+avg_trip_weekend, avg_trip_weekday = analyze_schedule(filename, query_sch)

@@ -1,22 +1,39 @@
 import pandas as pd
 import numpy as np
-from analysis import averga_trip_duration
+import sqlite3
 from datetime import datetime
 import re
 
 final_dfs = pd.read_csv("/Users/danielm/Downloads/trip_level.csv")
 final_dfs = final_dfs[final_dfs['consecutive_counts_y'].notna()]
 
-def determine_time_data(time_stmp):
-    date_object = datetime.strptime(time_stmp, "%Y%m%d %H:%M")
-    week_day_dic = {0: 'monday', 1:'tuesday', 2: 'wednesday', 3: 'thursday', 4: 'friday', 5: 'saturday', 6: 'sunday'}
-    day_of_week = date_object.weekday()
-    for number, day in week_day_dic.items():
-        if day_of_week == number:
-            day_of_week = day
-            break
-    day_time = None
+def do_analysis(final_dfs):
+    final_dfs['ghost'] = final_dfs.apply(lambda x: find_ghost_buses(x, mean_dist_route, std_distance_route), axis=1)
+    desired_columns = ['rt', 'day_time', 'weekend', 'ghost', 'consecutive_counts_y']
+    final_dfs = final_dfs[desired_columns]
+    return final_dfs
 
+def determine_time_data(time_stmp):
+    """
+    Given a time stamp, determine if the observation was on weekend and the
+    time of the day (morning, afternoon, night or midnight)
+
+    Inputs:
+        time_stamp (str): time stamp with the format %Y%m%d %H:%M
+    
+    Return:
+        day_time (str): time of the day (morning, night, etc)
+        weekend (bool): True if it was a weekend and False otherwise
+    """
+    date_object = datetime.strptime(time_stmp, "%Y%m%d %H:%M")
+    day = date_object.weekday()
+    weekend = None
+    if day < 5:
+        weekend = True
+    else:
+        weekend = False
+
+    day_time = None
     # Thresholds
     morning_time = datetime.strptime("06:00:00", "%H:%M:%S").time()
     afternoon_time = datetime.strptime("12:00:00", "%H:%M:%S").time()
@@ -32,9 +49,9 @@ def determine_time_data(time_stmp):
         day_time = "night"
     else:
         day_time = "midnight"
-    return day_time, day_of_week
+    return day_time, weekend
 
-final_dfs[['day_time', 'day_of_week']] = final_dfs['tmstmp'].apply(lambda x: pd.Series(determine_time_data(x)))
+final_dfs[['day_time', 'weekend']] = final_dfs['tmstmp'].apply(lambda x: pd.Series(determine_time_data(x)))
 
 mean_dist_route = final_dfs.groupby("rt")["total_dist"].mean()
 std_distance_route = final_dfs.groupby("rt")["total_dist"].std()
@@ -70,29 +87,6 @@ def find_ghost_buses(observation, mean_dist_route, std_distance_route):
     
 
 final_dfs['ghost'] = final_dfs.apply(lambda x: find_ghost_buses(x, mean_dist_route, std_distance_route), axis=1)
-desired_columns = ['rt', 'day_time', 'day_of_week', 'ghost', 'consecutive_counts_y']
+desired_columns = ['rt', 'day_time', 'weekend', 'ghost', 'consecutive_counts_y']
 final_dfs = final_dfs[desired_columns]
-
-# Compare schedule data with real data
-def create_dict_delays(df_real_data, average_trip_duration):
-    dict_delays = {}
-    for _, observation in df_real_data.iterrows():
-        route = observation["rt"]
-        day_time = observation["day_time"]
-        day = observation["day_of_week"]
-        if observation["ghost"]:
-            if route in dict_delays:
-                dict_delays[route] += 30
-            else:
-                dict_delays[route] = 30
-            continue
-        expected_time = average_trip_duration.get((day, route, day_time), np.nan)
-        delay = observation["consecutive_counts_y"] - expected_time
-        if delay > 10:
-            if route in dict_delays:
-                dict_delays[route] += delay
-            else:
-                dict_delays[route] = delay
-    return dict_delays
-
-test = create_dict_delays(final_dfs, average_trip_duration)
+    
