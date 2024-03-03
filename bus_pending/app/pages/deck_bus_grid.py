@@ -12,14 +12,15 @@ import dash_bootstrap_components as dbc
 # Register as Dash page -------------------------------------------------------
 
 dash.register_page(__name__, 
-                   path = "/bus_routes_pydeck", 
-                   title = "Bus routes (Pydeck)", 
-                   name =  "Bus routes (Pydeck)")
+                   path = "/bus_stops_pydeck", 
+                   title = "CTA Bus grid (Pydeck)", 
+                   name =  "CTA Bus grid (Pydeck)")
 
 # 0. Load Mapbox token --------------------------------------------------------
 
 # mapbox_key = get_stored_data('visualizations/.apikey', 'key')
-mapbox_key = ""
+mapbox_key = "pk.eyJ1Ijoicm1lZGluYTE5IiwiYSI6ImNsdDM3cWR2YjFrY3cyanA4MzM4cDJhMzEifQ.WQeC2uliJwPjp96Z2M4sSw"
+
 
 # 1. Clean and plot data ------------------------------------------------------
 
@@ -28,14 +29,19 @@ mapbox_key = ""
 ### Bus stops geo data
 geo_bus_stops = gpd.read_file("../visualizations/geodata/CTA_Bus_Stops.geojson")
 
-fig_stops = px.scatter_geo(geo_bus_stops, 
-                lat = geo_bus_stops.geometry.y, 
-                lon = geo_bus_stops.geometry.x, 
-                hover_name = "public_nam")
+# Build scatterplot layer
+layers_stops = [
+    # Bus Stops 
+    pdk.Layer(
+        type = "ScatterplotLayer", 
+        data = geo_bus_stops, 
+        pickable = True, 
+        get_position = "geometry.coordinates", 
+        get_fill_color = [255, 0, 0],
+        radius_scale = 15
+    )
+]
 
-
-fig_stops.update_geos(fitbounds="locations")
-fig_stops.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
 
 ## 1.4. Geo data: Chicago bus routes ------------------------------------------
 
@@ -57,27 +63,51 @@ layers_routes = [
     )
 ]
 
+
 # Center plot around Chicago 
 view_chicago = pdk.ViewState(
-    latitude = 41.8781, longitude = -87.6298, zoom = 12)
+    latitude = 41.8781, longitude = -87.6298, zoom = 11, 
+    pitch=45)
 
+
+# Build scatterplot layer
+layers_stops = [
+    # Bus Stops 
+    pdk.Layer(
+        type = "ScatterplotLayer", 
+        data = geo_bus_stops, 
+        pickable = True, 
+        get_position = "geometry.coordinates", 
+        get_fill_color = [255, 0, 0],
+        radius_scale = 15
+    )
+]
+
+# Edit a tooltip in a multilayred pydec
+# Source: https://discuss.streamlit.io/t/is-it-possible-to-implement-multi-layer-tooltips-with-pydeck/13614
 
 # Render Deck object with centered view and scatter layer
-chi_routes = pdk.Deck(
-    layers = layers_routes, 
+chi_stops_routes = pdk.Deck(
+    layers = [
+        layers_routes, 
+        layers_stops], 
     initial_view_state = view_chicago, 
     map_style='light', 
+    tooltip = {
+        "text": "Bus stop {public_nam}", 
+        "style": {
+            "color": "white"
+        } 
+    }
     )
-
 # Convert to html
-chi_routes.to_html("example.html")
+chi_stops_routes.to_html("bus_grid.html")
 
 # Save as deck_compontent to render in dash 
-deck_component_routes = dash_deck.DeckGL(
-    chi_routes.to_json(), id="deck-gl", tooltip=True, 
+deck_component_bus_grid = dash_deck.DeckGL(
+    chi_stops_routes.to_json(), id="deck-gl", tooltip=True, 
     mapboxKey=mapbox_key,
 )
-
 # 2. APP ----------------------------------------------------------------------
 # 2.1 Initialize app ----------------------------------------------------------
 
@@ -87,10 +117,9 @@ deck_component_routes = dash_deck.DeckGL(
 # 2.2 Define app layout -------------------------------------------------------
 
 layout = html.Div([
+    ## CTA Bus Stops with pydec
+    html.H4("Every bus stop in Chicago!"), 
     html.P("This plot was made with pydeck"), 
-    dbc.Row([
-        dbc.Col(deck_component_routes, 
-                style = {'margin-left':'15px', 'margin-top':'7px', 'margin-right':'15px'})])
-    ])
-
+    deck_component_bus_grid
+])
 

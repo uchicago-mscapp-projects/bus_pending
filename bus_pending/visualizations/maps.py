@@ -72,8 +72,3 @@ def map_neighborhoods():
     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
 
 
-    fig.show()
-
-    
-
-# YOU NEED TO REGISTER A WEB BROWSER TO BE ABLE TO OPEN THE PLOT

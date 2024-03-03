@@ -38,7 +38,7 @@ layer = pdk.Layer(
 
 # Define initial view of Chicago 
 view_chicago = pdk.ViewState(latitude = 41.8781, longitude = -87.6298, 
-                             zoom = 12, 
+                             zoom = 10, 
                              bearing=0, pitch=45)
 
 chi_trails = pdk.Deck(
