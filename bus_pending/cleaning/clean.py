@@ -180,7 +180,6 @@ def create_duration_df(filename):
     final_dfs.to_csv(pathlib.Path(__file__).parent.parent/'data/trip_time_level.csv')
     return
 
-def create_error_summary(filename)
 
 #create_duration_df(scraped_filename)
 
