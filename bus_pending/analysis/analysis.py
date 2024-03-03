@@ -30,7 +30,7 @@ def analyze_schedule(filename, query_sch):
             route and time_day (ie morning, afternoon, night and midnight)
     """
     df_schedule = query_schedule(filename, query_sch)
-    # Convert multiple boolean variables into one. Also duplicates a row, but the label will be different(monday, tuesday, etc)
+    # If service_id has schedules on saturday or sunday, weekend equal True
     df_schedule['weekday'] = df_schedule[['monday', 'tuesday', 'wednesday', 'thursday', 'friday']].any(axis=1)
     df_schedule['weekend'] = df_schedule[['saturday', 'sunday']].any(axis=1)
 
