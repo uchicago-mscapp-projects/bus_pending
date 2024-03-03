@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/bash
 
 if test -e ./data/buses.db 
 then
