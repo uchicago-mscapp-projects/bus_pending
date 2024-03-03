@@ -4,6 +4,7 @@ from bus_pending.analysis.analysis import keep_last_and_first, calculate_trip_du
 
 # Values to test keep last and first function
 columns_keep = ["trip_id", "weekday", "weekend", "arrival_time", "stop_id", "route_id"]
+columns_results = ["trip_id", "weekday", "weekend", "arrival_time", "stop_id", "route_id"]
 
 data_keep = [["350", True, False, "12:00:00", "fake_stop", "disney"],
              ["999", True, False, "15:00:00", "fake_stop2", "Uchicago"],
@@ -35,9 +36,21 @@ negative_case = pd.Timedelta(hours=1, minutes=10).total_seconds() / 60
 
 def test_keep_first_and_last():
     # Given the data we create, is simple to see what results we expect
-    first_and_last = keep_last_and_first(data_keep)
-    if not first_and_last == data_results_keep:
-        raise AssertionError("Function is not returning only the first and last observation of every trip")
+    first_and_last = keep_last_and_first(df_keep)
+    finish_time_102 = first_and_last.loc[first_and_last["trip_id"] == "102", "finish_time"]
+
+    start_time_999 = first_and_last.loc[first_and_last["trip_id"] == "999", "start_time"]
+
+    finish_time_350 = first_and_last.loc[first_and_last["trip_id"] == "350", "finish_time"]
+
+    if not all(finish_time_102 == "17:00:00"):
+        raise AssertionError("Function is not returning the correct finish time for trip_id 102")
+
+    if not all(start_time_999 == "15:00:00"):
+        raise AssertionError("Function is not returning the correct start time for trip_id 999")
+
+    if not all(finish_time_350 == "13:00:00"):
+        raise AssertionError("Function is not returning the correct finish time for trip_id 350")
     
 
 def test_calculate_duration():
