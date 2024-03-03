@@ -14,23 +14,23 @@ if __name__ == '__main__':
         quiet = False
 
     # Check if key exists
-    key = pathlib.Path('.apikey')
+    key = pathlib.Path(__file__).parents[2] / '.apikey'
     if not key.exists():
-        FileNotFoundError('.apikey file with your key is required to scrape the API.')
+        raise FileNotFoundError('.apikey file with your key is required.')
 
     # Check if routes list exists
-    routes = pathlib.Path('routes.txt')
+    routes = pathlib.Path(__file__).parents[2] / 'routes.txt'
     if routes.exists() and not quiet:
         print('routes.txt already exists. Scrape again? [y/n]')
         if input().lower() == 'y':
-            route.get_routes()
+            route.get_routes(routes)
     elif routes.exists() and quiet:
         pass
     else:
-        route.get_routes()
+        route.get_routes(routes)
 
     # Check if database exists
-    db = pathlib.Path('data/buses.db')
+    db = pathlib.Path(__file__).parents[2] / 'data/buses.db'
     if db.exists() and not quiet:
         print('buses.db already exists. Build and add schedules [y/n]')
         if input().lower() == 'y':
@@ -43,4 +43,4 @@ if __name__ == '__main__':
         schedules.scrape()
 
     # Conduct scrape
-    buses.scrape_bus_api('data/buses.db')
+    buses.scrape_bus_api(db)

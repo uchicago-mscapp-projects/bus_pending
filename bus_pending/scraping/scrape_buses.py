@@ -1,5 +1,6 @@
-import requests
 import math
+import pathlib
+import requests
 import time
 
 from scraping.make_db import save_request
@@ -31,7 +32,7 @@ def get_stored_data(file, type):
             elif type == "routes":
                 return data.split(',')
             else:
-                KeyError('Only "key" or "routes" are allowed data to call')
+                raise KeyError('Only "key" or "routes" are allowed data to call')
     except FileNotFoundError:
         print(f'Did not locate {file}')
 
@@ -95,8 +96,9 @@ def scrape_bus_api(file):
     Return (None): Saves output file
     '''
     # Get key from file
-    key = get_stored_data('.apikey', 'key')
-    routes = get_stored_data('routes.txt', 'routes')
+    root = pathlib.Path(__file__).parents[2]
+    key = get_stored_data(f'{root}/.apikey', 'key')
+    routes = get_stored_data(f'{root}/routes.txt', 'routes')
 
     # Scrape API
     positions = make_bus_request(key, routes)

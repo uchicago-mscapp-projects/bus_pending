@@ -96,7 +96,7 @@ def make_db():
     Create database from saved schema
     '''
     # First generate path
-    path = pathlib.Path("data/buses.db")
+    path = pathlib.Path(__file__).parents[2] / 'data/buses.db'
     if pathlib.Path(path).is_file():
         path.unlink() # Delete if it exists already
 
