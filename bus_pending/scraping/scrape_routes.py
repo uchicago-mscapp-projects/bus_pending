@@ -3,7 +3,7 @@ import requests
 
 from scraping.scrape_buses import get_stored_data
 
-def get_routes(file):
+def get_routes(file: str) -> None:
     '''
     Queries if the CTA bustracker API and saves a local version of the routes 
     file.

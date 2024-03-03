@@ -1,6 +1,8 @@
 import pathlib
 import sqlite3
 
+from typing import List
+
 
 # From getlocations API
 SCHEMA_BUSES = '''
@@ -91,7 +93,7 @@ SCHEMA_CALENDAR = '''
 '''
 
 
-def make_db():
+def make_db() -> None:
     '''
     Create database from saved schema
     '''
@@ -111,7 +113,9 @@ def make_db():
     cursor.close()
 
 
-def save_request(request, location, table, keys):
+def save_request(
+    request: List[dict], location: str, table: str, keys: List[str]
+) -> None:
     '''
     Saves a request output into the buses database.
 

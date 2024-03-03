@@ -4,11 +4,14 @@ import requests
 import time
 
 from scraping.make_db import save_request
+from typing import List
+
 
 BUS_KEYS = ['vid', 'tmstmp', 'lat', 'lon', 'hdg', 'pid', 'rt', 'des', \
             'pdist', 'dly', 'tatripid', 'origtatripno', 'tablockid', 'zone']
 
-def get_stored_data(file, type):
+
+def get_stored_data(file: str, type: str) -> str:
     '''
     Function to load an API key from a file
 
@@ -37,7 +40,7 @@ def get_stored_data(file, type):
         print(f'Did not locate {file}')
 
 
-def make_bus_request(key, routes):
+def make_bus_request(key: str, routes: str) -> List[dict]:
     '''
     Makes a request to the CTA bus tracker API with the following parameters.
 
@@ -47,7 +50,8 @@ def make_bus_request(key, routes):
             will be chunked into API requests of no more than 10 items so that
             the API will respond.
 
-    Returns (list): A list of JSON responses from the query
+    Returns (list): A list of JSON responses from the query stored as a 
+        dictionary.
     '''
     url = "http://ctabustracker.com/bustime/api/"
     ver = "v2/"
@@ -85,7 +89,7 @@ def make_bus_request(key, routes):
     return rv
 
 
-def scrape_bus_api(file):
+def scrape_bus_api(file: str) -> None:
     '''
     Wrapper function to use an API key and then call the
 

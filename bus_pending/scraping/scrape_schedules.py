@@ -5,6 +5,7 @@ import requests
 import zipfile
 
 from scraping.make_db import save_request
+from typing import List
 
 
 # Filenames
@@ -32,7 +33,7 @@ TO_CLEAN = [(STOPS, STOPS_KEYS, 'stops'), \
             (CALENDAR, CALENDAR_KEYS, 'calendar')]
 
 
-def download_file(url, file):
+def download_file(url: str, file: str) -> None:
     '''
     Download stops from the CTA transit site and then save it as a local file
     in data. If it's a zip file, it unzips it into the directory
@@ -56,24 +57,22 @@ def download_file(url, file):
     return None
     
 
-def load_txt_as_csv(file):
+def load_txt_as_csv(file: str) -> List[dict]:
     '''
     Loads the txt file and creates a dataframe with column headers
     that align to the schema.
 
     Input:
         file (str): Filepath to the stops csv to import
-        [Optional] names (List of strs or NOne): List of column names that are 
-            not imported.
 
-    Returns (list of Lits): List of dataframe elements to write into DB
+    Returns (list of dicts): List of dataframe elements to write into DB
     '''
     data_path = pathlib.Path(__file__).parents[2] / 'data/' 
     df = pd.read_csv(f'{data_path}/{file}')
     return df.to_dict('records')
 
 
-def scrape():
+def scrape() -> None:
     '''
     Load files from the URL, and then load remaining files into the buses.db
     file.
