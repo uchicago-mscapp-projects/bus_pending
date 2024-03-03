@@ -36,8 +36,9 @@ Requesting data from the CTA requires an [API key](https://www.ctabustracker.com
 
 Once you have an API key, we include a shell script to regularly scrape data from the CTA. Although we scraped bus locations each minute, this will exceed the rate limit of 10,000 requests per day, as each minute requires 13 requests to the CTA API for 18,740 requests per day. 
 To scrape the script, do the following once you have the working environment set-up as suggested in [Instructions](#instructions):
-1. Create a database using `poetry run python3 -m scraping –makedb`. This will scrape the scheduled routes
-2. Run each iteration of the scraper by running `poetry run python3 -m scraping –quiet`. The –quiet option automatically loads the database if /data/buses.db does not exist and then downloads the full list of routes from the CTA API to scrape. 
+1. Put your working directory into the bus_pending file by running `cd/bus_pending/bus_pending`.
+2. Create a database using `poetry run python3 -m scraping –makedb`. This will scrape the scheduled routes
+3. Run each iteration of the scraper by running `poetry run python3 -m scraping –quiet`. The –quiet option automatically loads the database if /data/buses.db does not exist and then downloads the full list of routes from the CTA API to scrape. 
 
 We provide a shell script schedule.sh, in the bus-pending/ folder to automate this process.
 
