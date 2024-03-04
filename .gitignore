@@ -232,5 +232,10 @@ reference
 /.luarc.json
 
 ## Exploratory files for data viz  --------------------------------------------
-.html 
+.html
+:Zone.Identifier 
 
+*.Identifier
+*.Identifier
+*.ipynb
+*.html
