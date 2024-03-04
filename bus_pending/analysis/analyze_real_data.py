@@ -5,8 +5,7 @@ from bus_pending.analysis.analysis import analyze_schedule, filename, query_sch
 from typing import Tuple
 import pathlib
 
-final_dfs = pd.read_csv("/Users/danielm/Downloads/trip_level.csv")
-final_dfs = final_dfs[final_dfs["consecutive_counts_y"].notna()]
+final_dfs = pd.read_csv("/Users/danielm/Downloads/trip_time_level (1).csv")
 
 csv_path_stats = pathlib.Path(__file__).parents[2] / "Data/stats_df.csv"
 csv_path_complete = pathlib.Path(__file__).parents[2] / "Data/complete_info.csv"
@@ -177,6 +176,7 @@ def do_analysis(final_dfs: pd.core.frame.DataFrame):
     Input:
         final_dfs (DataFrame): dataframe cleaned in cleaning directory
     """
+    final_dfs = final_dfs[final_dfs["consecutive_counts_y"].notna()]
     final_dfs[["day_time", "weekend"]] = final_dfs["tmstmp"].apply(
         lambda x: pd.Series(determine_time_data(x))
     )
