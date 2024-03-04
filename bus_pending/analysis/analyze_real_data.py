@@ -102,7 +102,6 @@ def create_df_stats(final_dfs: pd.core.frame.DataFrame) -> pd.core.frame.DataFra
     total_trips_rt = final_dfs_filtered.groupby("rt").size()
     # Group by 'rt' and calculate the sum of delays for each group
     n_delayed_rt = final_dfs_filtered.groupby("rt")["delay"].sum()
-    # Calculate the percentage of delays for each group relative to total trips
     percentage_delayed_rt = (n_delayed_rt / total_trips_rt) * 100
 
     # Create a new DataFrame with 'rt', 'n_delayed', 'percentage_delayed', and 'total_trips' columns
