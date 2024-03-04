@@ -22,6 +22,8 @@ pydeck = "^0.8.0"
 dash-deck = "^0.0.1"
 dash-bootstrap-components = "^1.5.0"
 dash-bootstrap-templates = "^1.1.2"
+black = "^24.2.0"
+ruff = "^0.3.0"
 
 
 [tool.poetry.group.dev.dependencies]
