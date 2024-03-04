@@ -1,6 +1,5 @@
 import geopandas as gpd
 import pandas as pd
-import pydeck as pdk
 import pathlib
 import json
 
@@ -71,9 +70,9 @@ def clean_bus_trips():
     can read. 
     """
     # STEP 1. Convert raw scraped data into json
-    #filename = pathlib.Paht(__file__) / "geodata"
+    filename = pathlib.Paht(__file__) / "scraped_data/bus_positions.json"
 
-    file = open("scraped_data/bus_positions.json") # This must be changed since it is a sample
+    file = open(filename) 
     bus_positions = json.load(file)
     file.close()
 
@@ -93,7 +92,8 @@ def clean_bus_trips():
     gdf_buses_unix_time = make_time_unix(gdf_buses, "tmstmp")
     df_trails = transform_points_to_paths(gdf_buses_unix_time, "coordinates", "unix_tmstmp")
 
-            
-    df_trails.to_json("geodata/trips_trails.json", orient = "records")
+
+    write_path = pathlib.Path(__file__) / "geodata/trips_trails.json"
+    df_trails.to_json(write_path, orient = "records")
     
 
