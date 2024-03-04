@@ -179,7 +179,7 @@ def create_duration_df(filename: str)-> pd.core.frame.DataFrame:
     final_dfs = turn_degree_to_dir(final_dfs)
     final_dfs = final_dfs.reset_index(drop=True)
 
-    final_dfs.to_csv(pathlib.Path(__file__).parent.parent/'data/trip_time_level.csv')
+    #final_dfs.to_csv(pathlib.Path(__file__).parent.parent/'data/trip_time_level.csv')
     return final_dfs
 
 
@@ -208,7 +208,13 @@ def create_error_summary(filename: str)-> pd.core.frame.DataFrame:
     return final_dfs
 
 
+def write(filename: str)-> None:
 
+    trip_time = create_duration_df(filename)
+    error_summary = create_error_summary(filename)
+
+    trip_time.to_csv(pathlib.Path(__file__).parent.parent/'data/trip_time_level.csv')
+    error_summary.to_csv(pathlib.Path(__file__).parent.parent/'data/error_summary.csv')
     
     
 
