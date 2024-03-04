@@ -1,2 +1,0 @@
-# To launch app, run this on terminal
-python ./app.py

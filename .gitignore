@@ -241,3 +241,6 @@ reference
 *.html
 bus_pending/app.py
 bus_pending/moving_buses.py
+bus_pending/visualizations/deck_app.py
+bus_pending/visualizations/journal.md
+bus_pending/visualizations/run_app.txt
