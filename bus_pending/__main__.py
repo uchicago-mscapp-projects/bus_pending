@@ -16,17 +16,17 @@ if __name__ == '__main__':
         raise FileNotFoundError('data/buses.db is needed to run the app.')
     
     # First clean and analyze data
-    # clean.write(db)
+    clean.write(db)
     clean_data = pathlib.Path(__file__).parents[1] / 'data/trip_time_level.csv'
     analyze.do_analysis()
     
     # Check for income raw files (this is dowloaded from ACS website)
     for year in range(2018, 2023): 
         csv_name = 'visualizations/acs_data/acs_income_zipcodes_' + str(year) + ".csv"
-        acs_data = pathlib.Path(__file__).parent[1] / csv_name
+        acs_data = pathlib.Path(__file__).parents[0] / csv_name
 
         if not acs_data.exists(): 
-            raise FileNotFoundError(f"ACS data for {year} is missing.")
+            raise FileNotFoundError(f"ACS data for {year} is missing. File path: {acs_data}")
 
     viz_plotly.write_income_series()   
         

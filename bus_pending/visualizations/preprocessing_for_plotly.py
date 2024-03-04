@@ -7,7 +7,7 @@ from skimpy import clean_columns
 import pathlib
 
 
-def clean_income_data(file, year):
+def clean_income_data(path, year):
     """
     Takes income data from ACS tables and aggregates it by zipcode in a format
     that easily readable by plotly.
@@ -22,7 +22,7 @@ def clean_income_data(file, year):
     by year.
     """
     # Open file
-    file = open(file + str(year) + ".csv")
+    file = open(path)
     df_income_raw = pd.read_csv(file)
     file.close()
 
@@ -74,14 +74,14 @@ def write_income_series(min_year=2018, max_year=2022):
     df_income_zip_code_series = pd.DataFrame()
 
     for year in range(min_year, max_year + 1):
-        csv_name = "/acsdata/acs_income_zipcodes_" + str(year) + ".csv"
-        path = pathlib.Path(__file__) / csv_name
+        csv_name = "acs_data/acs_income_zipcodes_" + str(year) + ".csv"
+        path = pathlib.Path(__file__).parents[0] / csv_name
 
         df_year = clean_income_data(path, year)
 
         df_income_zip_code_series = pd.concat([df_income_zip_code_series, df_year])
 
-    write_path = pathlib.Path(__file__) / "acs_data/df_income_zip_code_series.csv"
+    write_path = pathlib.Path(__file__).parents[0] / "acs_data/df_income_zip_code_series.csv"
     df_income_zip_code_series.to_csv(write_path, index=False)
 
 

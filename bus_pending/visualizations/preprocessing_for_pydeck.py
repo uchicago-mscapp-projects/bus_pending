@@ -73,7 +73,7 @@ def clean_bus_trips():
     can read.
     """
     # STEP 1. Convert raw scraped data into json
-    filename = pathlib.Paht(__file__) / "scraped_data/bus_positions.json"
+    filename = pathlib.Path(__file__).parents[0] / "scraped_data/bus_positions.json"
 
     file = open(filename)
     bus_positions = json.load(file)
@@ -97,5 +97,5 @@ def clean_bus_trips():
         gdf_buses_unix_time, "coordinates", "unix_tmstmp"
     )
 
-    write_path = pathlib.Path(__file__) / "geodata/trips_trails.json"
+    write_path = pathlib.Path(__file__).parents[0] / "geodata/trips_trails.json"
     df_trails.to_json(write_path, orient="records")
