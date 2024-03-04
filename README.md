@@ -18,7 +18,7 @@ Our approach is described in more detail in our [report](https://github.com/RMed
 2. Run `poetry install` from the top-level directory ‘/bus-pending’ to set up the working environment in Python. Note: this requires installing Python and Poetry, a Python package manager.
 3. Download our database of bus positions (826 mb) and place it in a data directory ‘/bus-pending/data’ or scrape data yourself. See [below](#scraping) for details on scraping data yourself.
 4. Clean and analyze data by running `poetry run python3 -m bus-pending`
-5. Launch the dashboard by running `poetry run python ./app.py` from the terminal in the `bus_pending/app/` folder. 
+5. Launch the dashboard by moving to the app folder with `cd bus_pending/app/` and then running `poetry run python ./app.py`. 
 
 ## Data and Technology:
 We use the following data sets:
@@ -36,7 +36,7 @@ Requesting data from the CTA requires an [API key](https://www.ctabustracker.com
 
 Once you have an API key, we include a shell script to regularly scrape data from the CTA. Although we scraped bus locations each minute, this will exceed the rate limit of 10,000 requests per day, as each minute requires 13 requests to the CTA API for 18,740 requests per day. 
 To scrape the script, do the following once you have the working environment set-up as suggested in [Instructions](#instructions):
-1. Put your working directory into the bus_pending file by running `cd/bus_pending/bus_pending`.
+1. Put your working directory into the bus_pending file by running `cd bus_pending/bus_pending`.
 2. Create a database using `poetry run python3 -m scraping –makedb`. This will scrape the scheduled routes
 3. Run each iteration of the scraper by running `poetry run python3 -m scraping –quiet`. The –quiet option automatically loads the database if /data/buses.db does not exist and then downloads the full list of routes from the CTA API to scrape. 
 
