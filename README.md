@@ -18,7 +18,7 @@ Our approach is described in more detail in our [report](https://github.com/RMed
 2. Run `poetry install` from the top-level directory ‘/bus-pending’ to set up the working environment in Python. Note: this requires installing Python and Poetry, a Python package manager.
 3. Download our database of bus positions (826 mb) and place it in a data directory ‘/bus-pending/data’ or scrape data yourself. See [below](#scraping) for details on scraping data yourself.
 4. Clean and analyze data by running `poetry run python3 -m bus-pending`
-5. Launch the dashboard by moving to the app folder with `cd bus_pending/app/` and then running `poetry run python ./app.py`. 
+5. Launch the dashboard by moving to the app folder with `cd bus_pending/app/` and then running `poetry run python ./app.py`. For the `pydeck` plots to render correctly, it is necessary to have a Mapbox API key. 
 
 ## Data and Technology:
 We use the following data sets:
@@ -26,8 +26,10 @@ We use the following data sets:
 - [CTA bus locations](https://www.transitchicago.com/developers/bustracker/): The CTA bus tracker API provides bus locations each minute on their bus tracker API..
 - [CTA schedule](https://www.transitchicago.com/developers/gtfs/): The CTA provides data in the General Transit Feed Specification (GTFS) that describes scheduled routes. 
 - [CTA Route GeoData](https://data.cityofchicago.org/Transportation/CTA-Bus-Routes-kml/rytz-fq6y/about_data): CTA routes are publicly accessible as shapefiles on the City of Chicago’s Open Data portal.
+- [CTA Bus Stops GeoData](https://data.cityofchicago.org/Transportation/CTA-Bus-Stops-Shapefile/pxug-u72f): CTA routes are publicly accessible as shapefiles on the City of Chicago’s Open Data portal.
 - [Chicago Community Area GeoData](https://data.cityofchicago.org/Facilities-Geographic-Boundaries/Boundaries-Community-Areas-current-/cauq-8yn6): Chicago community area boundaries are publicly accessible as shapefiles on the City of Chicago’s Open Data portal.
 - [American Community Survey](https://data.census.gov/table?t=Income+and+Poverty&g=050XX00US17031%241000000%2C17031%241500000&y=2022&d=ACS+5-Year+Estimates+Detailed+Tables): We use block-level income and poverty measures from the American Community Survey for our map backgrounds. This links the table referenced.
+- [High quality shapefiles from Mapbox](https://www.mapbox.com/): Pydeck plots are rendered with high-quality and detailed shapefiles that are obtained by querying the Mapbox API. 
 
 We scrape, clean, and analyze these data using Python 3.12, store the data in sqlite3, and visualize the data on a Dash app using Plotly and PyDeck. Our cleaning frameworks are Pandas and GeoPandas.
 
