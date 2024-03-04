@@ -153,9 +153,8 @@ For projects that want to scrape delay data, (4) can be conducted regularly usin
 The visualization application is the primary component. Once data are downloaded, it:
 
 1.  `clean.py` queries the `./data/buses.db` database to extract bus-minute-level data and returns a route-level dataset with relevant columns as a CSV in the ignored `/data/` folder.
-2.  `analyze_real_data.py` and `analysis.py` Combines the route-level data with expected timing data from the `buses.db` data.
-3.  `compare_schedule_real_data.py` then determines delays.
-4.  !! Regina to add app structure
+2.  `analyze_real_data.py` and `analysis.py` Combines the route-level data with expected timing data from the `buses.db` data and determines delays.
+3.  !! Regina to add app structure
 
 ## 5. Members and Responsibilities
 
