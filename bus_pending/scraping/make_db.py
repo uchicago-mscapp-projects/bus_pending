@@ -98,6 +98,7 @@ def make_db() -> None:
     Create database from saved schema
     '''
     # First generate path
+    # Design pattern from PA #3 in CAPP 121 class
     path = pathlib.Path(__file__).parents[2] / 'data/buses.db'
     if pathlib.Path(path).is_file():
         path.unlink() # Delete if it exists already
