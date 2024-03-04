@@ -210,6 +210,18 @@ def create_error_summary(filename: str)-> pd.core.frame.DataFrame:
 
 def write(filename: str)-> None:
 
+    """
+    This function writes the cleaning results to csv files.
+
+    Input(str): 
+        filename: path of the scraped data
+    Output(None):
+        trip_time_level.csv: Collapsed clean data to trip-time level for analyis and visualisation.
+        error_summary.csv: Summary file for all the data erros we identified from the raw data.
+        
+
+    """
+
     trip_time = create_duration_df(filename)
     error_summary = create_error_summary(filename)
 
