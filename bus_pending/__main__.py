@@ -29,7 +29,6 @@ if __name__ == '__main__':
         if not acs_data.exists(): 
             raise FileNotFoundError(f"ACS data for {year} is missing. File path: {acs_data}")
 
-
     # Launch site
     print("Creating maps...")     
     viz_plotly.write_income_series()   
