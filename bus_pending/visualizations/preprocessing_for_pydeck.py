@@ -50,16 +50,17 @@ def transform_points_to_paths(gdf, points_col_name, time_col_name):
     for trip in trips:
         df_bus = gdf[gdf["vid"] == trip]
         route = df_bus["rt"].unique()[0]
+        delay = df_bus["dly"].unique()[0]
         df_bus = pd.DataFrame(df_bus[[points_col_name, time_col_name]])
 
         list_coordinates = list(df_bus[points_col_name])
         list_tmstmp = list(df_bus[time_col_name])
 
-        data = [[route, trip, list_coordinates, list_tmstmp]]
+        data = [[route, trip, delay, list_coordinates, list_tmstmp]]
 
         # Create the pandas DataFrame
         df_bus_trail = pd.DataFrame(
-            data, columns=["route", "vid", "coordinates", "tmstmp"]
+            data, columns=["route", "vid", "delay", "coordinates", "tmstmp"]
         )
 
         df_trips_trails = pd.concat([df_trips_trails, df_bus_trail], axis=0)

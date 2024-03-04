@@ -26,12 +26,32 @@ file = open("../visualizations/geodata/trips_trails.json")
 df_trips_trails = pd.read_json(file)
 file.close()
 
-layer = pdk.Layer(
+# Separete data frame by delay 
+df_delays = df_trips_trails[df_trips_trails["delay"]]
+delayed_buses = list(df_delays["vid"])
+df_on_time = df_trips_trails[~df_trips_trails["vid"].isin(delayed_buses)]
+
+
+layer_delay = pdk.Layer(
     "TripsLayer",
-    df_trips_trails,
+    df_delays,
     get_path="coordinates",
     get_timestamps="tmstmp",
-    get_color=[253, 128, 93],
+    get_color=[237, 28, 36],
+    # get_color = "colors",
+    width_min_pixels=5,
+    current_time=2340,
+    trail_length=800,
+    rounded=True,
+)
+
+layer_on_time = pdk.Layer(
+    "TripsLayer",
+    df_on_time,
+    get_path="coordinates",
+    get_timestamps="tmstmp",
+    get_color=[77, 184, 72],
+    # get_color = "colors",
     width_min_pixels=5,
     current_time=2340,
     trail_length=800,
@@ -40,11 +60,11 @@ layer = pdk.Layer(
 
 # Define initial view of Chicago
 view_chicago = pdk.ViewState(
-    latitude=41.8781, longitude=-87.6298, zoom=10, bearing=0, pitch=45
+    latitude=41.8781, longitude=-87.6298, zoom=11, bearing=0, pitch=45
 )
 
 chi_trails = pdk.Deck(
-    layers=[layer],
+    layers=[layer_delay, layer_on_time],
     initial_view_state=view_chicago,
     # map_style='light',
 )
