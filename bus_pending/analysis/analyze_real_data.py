@@ -114,7 +114,6 @@ def create_df_stats(final_dfs: pd.core.frame.DataFrame) -> pd.core.frame.DataFra
         }
     )
 
-    # Sort the DataFrame by 'percentage_delayed' in descending order
     delayed_df_sorted = delayed_df.sort_values(by="percentage_delayed", ascending=False)
     max_delayed_time_rt = final_dfs_filtered.groupby("rt")["delayed_time"].max()
 
@@ -195,5 +194,4 @@ def do_analysis():
     final_dfs.to_csv(csv_path_complete)
     df_stats = create_df_stats(final_dfs)
     df_stats.to_csv(csv_path_stats)
-
-do_analysis()
+    
