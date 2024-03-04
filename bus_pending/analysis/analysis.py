@@ -5,7 +5,7 @@ import re
 import pathlib
 
 
-filename = pathlib.Path(__file__).parents[2] / "data/buses_static_2024-02-29.db"
+filename = pathlib.Path(__file__).parents[2] / "data/buses.db"
 
 query_sch = """
 SELECT schedule.*, trips.route_id, trips.direction, calendar.*
