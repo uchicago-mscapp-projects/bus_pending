@@ -18,7 +18,7 @@ Our approach is described in more detail in our [report](https://github.com/RMed
 2. Run `poetry install` from the top-level directory ‘/bus-pending’ to set up the working environment in Python. Note: this requires installing Python and Poetry, a Python package manager.
 3. Download our database of bus positions (826 mb) and place it in a data directory ‘/bus-pending/data’ or scrape data yourself. See [below](#scraping) for details on scraping data yourself.
 4. Clean and analyze data by running `poetry run python3 -m bus-pending`
-5. Launch the dashboard by `poetry run python -m bus_pending/app`
+5. Launch the dashboard by running `poetry run python ./app.py` from the terminal in the `bus_pending/app/` folder. 
 
 ## Data and Technology:
 We use the following data sets:
