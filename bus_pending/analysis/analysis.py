@@ -3,7 +3,6 @@ import sqlite3
 from datetime import datetime
 import re
 import pathlib
-from typing import NewType
 
 
 filename = pathlib.Path(__file__).parents[2] / "Data/buses_static_2024-02-29.db"
