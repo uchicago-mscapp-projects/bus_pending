@@ -18,7 +18,7 @@ if __name__ == '__main__':
         raise FileNotFoundError('data/buses.db is needed to run the app.')
     
     # First clean and analyze data
-    clean.write(db)
+    # clean.write(db)
     clean_data = pathlib.Path(__file__).parents[1] / 'data/trip_time_level.csv'
-    analyze.do_analysis(clean_data)
+    analyze.do_analysis()
     

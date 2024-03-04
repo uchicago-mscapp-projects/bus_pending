@@ -5,7 +5,6 @@ from bus_pending.analysis.analysis import analyze_schedule, filename, query_sch
 from typing import Tuple
 import pathlib
 
-final_dfs = pd.read_csv(pathlib.Path(__file__).parents[2] / "data/trip_time_level.csv")
 
 csv_path_stats = pathlib.Path(__file__).parents[2] / "data/stats_df.csv"
 csv_path_complete = pathlib.Path(__file__).parents[2] / "data/complete_info.csv"
@@ -165,7 +164,7 @@ def estimate_delay(
             df_real_data.loc[observation.name, "delayed_time"] = 0
 
 
-def do_analysis(final_dfs: pd.core.frame.DataFrame):
+def do_analysis():
     """
     This function does all the analysis. From analyzing schedule data to analyze
         real data and then compare them to estimate delays. Creates two
@@ -176,7 +175,12 @@ def do_analysis(final_dfs: pd.core.frame.DataFrame):
     Input:
         final_dfs (DataFrame): dataframe cleaned in cleaning directory
     """
+    final_dfs = pd.read_csv(pathlib.Path(__file__).parents[2] / "data/trip_time_level.csv")
     final_dfs = final_dfs[final_dfs["consecutive_counts_y"].notna()]
+    csv_path_stats = pathlib.Path(__file__).parents[2] / "data/stats_df.csv"
+    csv_path_complete = pathlib.Path(__file__).parents[2] / "data/complete_info.csv"
+    avg_trip_weekday, avg_trip_weekend = analyze_schedule(filename, query_sch)
+
     final_dfs[["day_time", "weekend"]] = final_dfs["tmstmp"].apply(
         lambda x: pd.Series(determine_time_data(x))
     )
@@ -193,4 +197,4 @@ def do_analysis(final_dfs: pd.core.frame.DataFrame):
     df_stats = create_df_stats(final_dfs)
     df_stats.to_csv(csv_path_stats)
 
-do_analysis(final_dfs)
+do_analysis()
