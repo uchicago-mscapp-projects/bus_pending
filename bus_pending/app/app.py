@@ -49,7 +49,7 @@ app.layout = html.Div(
         dbc.Row(
             [
                 html.P(
-                    "This project was done for the CAPP 30122 course by Michael Rosenbaum, Keling Yue, Daniel Muñoz, and Regina Isabel Medina"
+                    "This project was done for the CAPP 30122 course by Michael Rosenbaum, Regina Isabel Medina, Daniel Muñoz, and Keling Yue."
                 ),
             ]
         ),

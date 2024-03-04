@@ -44,7 +44,10 @@ layout = html.Div(
                 )
             ],
         ),
-        html.H4("Methodology"),
-        html.H4("Libraries and dependencies"),
+        html.H4("Libraries"),
+        html.P("We scrape, clean, and analyze these data using Python 3.12, store the data in sqlite3, and visualize the data on a Dash app using Plotly and PyDeck. Our cleaning frameworks are Pandas and GeoPandas."),
+        html.H4("Acknoledgments"),
+        html.P("We owe a big thank you to guidance and encouragement from our professor, James Turk, and our Teaching Assistant: Katherine Dumais. This project wouldn’t have been possible without either of them. We also would like to thank the open source community who have invested time and effort building and documenting the tools we used for this project.")
+
     ]
 )
