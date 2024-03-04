@@ -4,12 +4,6 @@ import pydeck as pdk
 import pathlib
 import json
 
-def map_bus_stops(file): 
-    pass
-
-def map_bus_routes(file): 
-    pass
-
 
 def make_time_unix(gdf, time_column_name):
     """
