@@ -27,7 +27,7 @@ df_stats_long = pd.melt(
     )
 
 df_average = df_stats_long.groupby(["variable"]).agg(
-    value = pd.NamedAgg(column = "value", aggfunc=np.mean), 
+    value = pd.NamedAgg(column = "value", aggfunc="mean"), 
     ).reset_index()
 
 df_average["rt"] = "Average"
@@ -136,9 +136,9 @@ def compare_route_with_average(user_route):
     df_indicators = pd.concat([df_route, df_average], axis = 0)
     df_indicators = pd.DataFrame(df_indicators)
 
-    df_indicators.loc[df_indicators["variable"] == "n_delayed", "variable"] = "Total delayed trips"
+    df_indicators.loc[df_indicators["variable"] == "n_delayed", "variable"] = "Total delayed trips in a week"
     df_indicators.loc[df_indicators["variable"] == "percentage_delayed", "variable"] = "% trips delayed"
-    df_indicators.loc[df_indicators["variable"] == "max_delayed_time", "variable"] = "Highest waiting time registered"
+    df_indicators.loc[df_indicators["variable"] == "max_delayed_time", "variable"] = "Highest waiting time registered (in minutes)"
 
 
     fig_compare =  px.bar(
