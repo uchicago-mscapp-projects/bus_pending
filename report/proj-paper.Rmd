@@ -4,10 +4,10 @@ title: "__Bus pending__"
 subtitle: "Final project for CAPP 30122"
 
 author:
-- Regina Isabel Medina Rosales
-- Daniel Muñoz
-- Michael Rosenbaum
-- Keling Yue 
+- Michael Rosenbaum (mrosenbaum)
+- Regina Isabel Medina Rosales (rmedina)
+- Daniel Muñoz (dmunozbatista)
+- Keling Yue (keling)
 
 # date: "`r Sys.Date()`"
 date: "Winter 2024"
@@ -102,7 +102,11 @@ We provide a shell script schedule.sh, in the `./bus-pending/` folder to automat
 
 We structure the dataflow in two parts, aligning with the scraping and visualization described in Section 3. This data flow is visualized below:
 
-![Data structure of Bus Pending application](https://raw.githubusercontent.com/RMedina19/bus_pending/main/report/Bus%20Pending%20Dataflow.png)
+
+```{r stata_plots, out.height="80%", out.width="80%", fig.align="center", echo = FALSE}
+knitr::include_graphics("Bus_Pending_Dataflow.png")
+```
+
 
 These lead to a structure:
 
@@ -171,9 +175,9 @@ We split our coding responsibilities by each component of the application descri
 
 These areas directly map to subfolders in the `./bus_pending` folder:
 
--   Michael wrote all scripts in the `scraping/` subfolder and the schedule.sh script
+-   Michael wrote all scripts in the `scraping/` subfolder and the schedule.sh script 
 
--   Keling wrote all scripts in the `cleaning/` subfolder.
+-   Keling wrote all scripts in the `cleaning/` subfolder
 
 -   Daniel wrote all scripts in the `analysis/` subfolder, including suggesting analytical decisions such as sample restrictions.
 
