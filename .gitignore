@@ -161,7 +161,7 @@ routes.txt
 # Local testing
 *local_test.ipynb
 pos.json
-data/
+# data/
 
 ## BASH -----------------------------------------------------------------------
 # Environment stuff

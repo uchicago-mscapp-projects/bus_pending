@@ -1,7 +1,7 @@
 import sys
 import pathlib
 
-import bus_pending.app as app
+# import bus_pending.app as app
 import bus_pending.analysis.analyze_real_data as analyze
 import bus_pending.cleaning.clean as clean
 import bus_pending.visualizations.acs as viz_acs
@@ -22,7 +22,7 @@ if __name__ == '__main__':
     clean_data = pathlib.Path(__file__).parents[1] / 'data/trip_time_level.csv'
     analyze.do_analysis()
     
-    # Check for income raw files
+    # Check for income raw files (this is dowloaded from ACS website)
     for year in range(2018, 2023): 
         csv_name = 'visualizations/acsdata/acs_income_zipcodes_' + str(year) + ".csv"
         acs_data = pathlib.Path(__file__) / csv_name
@@ -31,6 +31,6 @@ if __name__ == '__main__':
             raise FileNotFoundError(f"ACS data for {year} is missing.")
 
     viz_plotly.write_income_series()   
-    
         
-    # Check for 
+    # Clean bus trips data (this is scraped data)
+    viz_pydeck.clean_bus_trips()
