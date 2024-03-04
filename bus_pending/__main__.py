@@ -22,8 +22,8 @@ if __name__ == '__main__':
     
     # Check for income raw files (this is dowloaded from ACS website)
     for year in range(2018, 2023): 
-        csv_name = 'visualizations/acsdata/acs_income_zipcodes_' + str(year) + ".csv"
-        acs_data = pathlib.Path(__file__) / csv_name
+        csv_name = 'visualizations/acs_data/acs_income_zipcodes_' + str(year) + ".csv"
+        acs_data = pathlib.Path(__file__).parent[1] / csv_name
 
         if not acs_data.exists(): 
             raise FileNotFoundError(f"ACS data for {year} is missing.")
