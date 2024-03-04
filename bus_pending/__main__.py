@@ -16,8 +16,9 @@ if __name__ == '__main__':
         raise FileNotFoundError('data/buses.db is needed to run the app.')
     
     # First clean and analyze data
+    print('Cleaning data...')
     clean.write(db)
-    clean_data = pathlib.Path(__file__).parents[1] / 'data/trip_time_level.csv'
+    print('Analyzing data...')
     analyze.do_analysis()
     
     # Check for income raw files (this is dowloaded from ACS website)
@@ -28,7 +29,9 @@ if __name__ == '__main__':
         if not acs_data.exists(): 
             raise FileNotFoundError(f"ACS data for {year} is missing. File path: {acs_data}")
 
+
+    # Launch site
+    print("Creating maps...")     
     viz_plotly.write_income_series()   
-        
     # Clean bus trips data (this is scraped data)
     viz_pydeck.clean_bus_trips()
