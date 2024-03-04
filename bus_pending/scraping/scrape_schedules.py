@@ -52,7 +52,7 @@ def download_file(url: str, file: str) -> None:
     # Unzip file
     # from https://stackoverflow.com/a/36662770
     with zipfile.ZipFile(f'{data_path}/{file}', 'r') as zip_ref:
-        zip_ref.extractall('data/')
+        zip_ref.extractall(f'{data_path}/')
 
     return None
     
