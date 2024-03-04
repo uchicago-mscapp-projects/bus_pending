@@ -55,7 +55,6 @@ def analyze_schedule(filename: str, query_sch: str) -> pd.core.frame.DataFrame:
     avg_trip_weekend = transformed_df.groupby(["weekend", "route_id", "day_time"])[
         "duration_trip"
     ].mean()
-
     return avg_trip_weekend, avg_trip_weekday
 
 

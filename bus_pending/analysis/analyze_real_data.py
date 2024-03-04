@@ -193,5 +193,4 @@ def do_analysis(final_dfs: pd.core.frame.DataFrame):
     df_stats = create_df_stats(final_dfs)
     df_stats.to_csv(csv_path_stats)
 
-
 do_analysis(final_dfs)
