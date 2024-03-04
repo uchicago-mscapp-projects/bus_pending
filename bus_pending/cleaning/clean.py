@@ -1,12 +1,11 @@
 import pandas as pd
 import sqlite3
-import pyarrow
 import numpy as np
 import pathlib
 
 #scraped_filename = pathlib.Path(__file__).parent.parent/"data/buses_static_2024-02-29.db"
 
-def import_data(filename):
+def import_data(filename: str)-> pd.core.frame.DataFrame:
 
     """
     read our database into a Pandas dataframe
@@ -22,10 +21,12 @@ def import_data(filename):
     query = "SELECT * FROM buses WHERE tmstmp > '20240220 23:59'"
     df = pd.read_sql_query(query, conn)
     conn.close()
+    df['time'] = pd.to_datetime(df['tmstmp'], format='%Y%m%d %H:%M', errors='coerce')
 
     return df
 
-def ghostbuses(df):
+
+def ghostbuses(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
 
     """
     If a bus only appears in the data frame for one minute, we
@@ -49,7 +50,7 @@ def ghostbuses(df):
     return df
 
 
-def determine_occurrence(subset):
+def determine_occurrence(subset: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
 
     """
     If the bus changes its direction from last minute, 
@@ -80,7 +81,7 @@ def determine_occurrence(subset):
     return final_df
 
 
-def error_dealing(subset):
+def error_dealing(subset: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
 
     """
     In our scraping data, there are buses that are in the middle of trips when our scraping begins
@@ -105,12 +106,12 @@ def error_dealing(subset):
                              'middle_cut')
     # then we deal with the rest
     condition = subset['error'] == 'complete'
-    subset.loc[condition, 'error'] = np.where(subset.loc[condition, 'consecutive_counts'] <= 10, 'misoperation', 'complete')
+    subset.loc[condition, 'error'] = np.where(subset.loc[condition, 'consecutive_counts'] <= 15, 'misoperation', 'complete')
     
     return subset
 
 
-def final_observation(df):
+def final_observation(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
 
     """
     To map with scheduled data, we take the last observation of one trip of a bus, and return its direction.
@@ -127,10 +128,12 @@ def final_observation(df):
     df['total_dist'] = grouped_sum 
     last_values = df.groupby('group')['hdg'].transform('last')
     df['last_value'] = last_values
+    durations = df.groupby('group')['time'].transform(lambda x:((x.max() - x.min()).total_seconds()) / 60)
+    df['durations'] = durations
 
     return df
 
-def turn_degree_to_dir(df):
+def turn_degree_to_dir(df: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
 
     """
     Turn numerical degree for direction into string-type direction.
@@ -149,13 +152,13 @@ def turn_degree_to_dir(df):
     return df
 
 
-def create_duration_df(filename):
+def create_duration_df(filename: str)-> pd.core.frame.DataFrame:
 
     """
     This function is used to create a restricted sample of trip-time level data
 
     Input(str):
-        filename:path of the scraped data
+        filename: path of the scraped data
     Output(None)
         this function will write trip-time level dataframe into a csv and put it under data folder 
     """
@@ -169,17 +172,40 @@ def create_duration_df(filename):
         subset = error_dealing(subset)
         complete_subset = determine_occurrence(subset[subset['error'] == 'complete'])
         final_bus_level = final_observation(complete_subset)
-        final_bus_level.sort_values(['group', 'tmstmp'], inplace=True)
+        #final_bus_level.sort_values(['group', 'tmstmp'], inplace=True)
         collapsed_df = final_bus_level.groupby('group').last().reset_index()
-        concat_subsets.append(collapsed_df)
+        concat_subsets.append(collapsed_df[collapsed_df['durations']<180])
     final_dfs = pd.concat(concat_subsets)
     final_dfs = turn_degree_to_dir(final_dfs)
-    final_dfs.drop(final_dfs.columns[1], axis=1,inplace=True)
     final_dfs = final_dfs.reset_index(drop=True)
 
     final_dfs.to_csv(pathlib.Path(__file__).parent.parent/'data/trip_time_level.csv')
-    return
+    return final_dfs
 
+
+def create_error_summary(filename: str)-> pd.core.frame.DataFrame:
+
+    """
+    This function takes the full sample(including rows we considered as errors) for duration calculation.
+    It is useful for analyis and summary on errors.
+
+    Input(str): 
+        filename: path of the scraped data
+    Output(Pandas dataframe):
+        final_dfs: dataframe with duration calculation for full sample
+    """
+
+    df = import_data(filename)
+    df = ghostbuses(df)
+    concat_subsets = []
+    for name, subset in df.groupby(by = 'vid'):
+        subset.sort_values(by = 'tmstmp')
+        subset = determine_occurrence(subset)
+        subset = error_dealing(subset)
+        concat_subsets.append(subset)
+    final_dfs = pd.concat(concat_subsets)
+
+    return final_dfs
 
 
 
@@ -187,7 +213,7 @@ def create_duration_df(filename):
     
 
 
-#create_duration_df(scraped_filename)
+
 
 
 
