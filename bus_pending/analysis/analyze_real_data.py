@@ -5,10 +5,10 @@ from bus_pending.analysis.analysis import analyze_schedule, filename, query_sch
 from typing import Tuple
 import pathlib
 
-final_dfs = pd.read_csv("/Users/danielm/Downloads/trip_time_level (1).csv")
+final_dfs = pd.read_csv(pathlib.Path(__file__).parents[2] / "data/trip_time_level.csv")
 
-csv_path_stats = pathlib.Path(__file__).parents[2] / "Data/stats_df.csv"
-csv_path_complete = pathlib.Path(__file__).parents[2] / "Data/complete_info.csv"
+csv_path_stats = pathlib.Path(__file__).parents[2] / "data/stats_df.csv"
+csv_path_complete = pathlib.Path(__file__).parents[2] / "data/complete_info.csv"
 
 avg_trip_weekday, avg_trip_weekend = analyze_schedule(filename, query_sch)
 
@@ -192,6 +192,5 @@ def do_analysis(final_dfs: pd.core.frame.DataFrame):
     final_dfs.to_csv(csv_path_complete)
     df_stats = create_df_stats(final_dfs)
     df_stats.to_csv(csv_path_stats)
-
 
 do_analysis(final_dfs)

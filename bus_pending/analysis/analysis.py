@@ -5,7 +5,7 @@ import re
 import pathlib
 
 
-filename = pathlib.Path(__file__).parents[2] / "Data/buses_static_2024-02-29.db"
+filename = pathlib.Path(__file__).parents[2] / "data/buses_static_2024-02-29.db"
 
 query_sch = """
 SELECT schedule.*, trips.route_id, trips.direction, calendar.*
@@ -55,7 +55,6 @@ def analyze_schedule(filename: str, query_sch: str) -> pd.core.frame.DataFrame:
     avg_trip_weekend = transformed_df.groupby(["weekend", "route_id", "day_time"])[
         "duration_trip"
     ].mean()
-
     return avg_trip_weekend, avg_trip_weekday
 
 
