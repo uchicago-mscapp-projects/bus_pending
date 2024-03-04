@@ -6,11 +6,6 @@ from typing import Tuple
 import pathlib
 
 
-csv_path_stats = pathlib.Path(__file__).parents[2] / "data/stats_df.csv"
-csv_path_complete = pathlib.Path(__file__).parents[2] / "data/complete_info.csv"
-
-avg_trip_weekday, avg_trip_weekend = analyze_schedule(filename, query_sch)
-
 
 def determine_time_data(time_stmp: str) -> Tuple[str, bool]:
     """
