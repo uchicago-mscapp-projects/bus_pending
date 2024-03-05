@@ -12,7 +12,7 @@ Take data from transit. Join multiple tables in order to have trip_id, service_i
 
 * Estimate day_time. Morning is defined from 6 am to 12 pm, afternoon from 12 pm to 6 pm, night from 6 pm to 12 am, and midnight from 12 am to 6 am. Use datetime to parse the string into DeltaTime object
 
-* Group by route, day_time and day. Then, estimate the average trip duration by this groups. For example, how much time, in average, does it take the route 4 on friday afternoon to complete the route?
+* Group by route, day_time and weekday/weekend. Then, estimate the average trip duration by this groups. For example, how much time, in average, does it take the route 4 on friday afternoon to complete the route?
 
 * Use this group object to compare with real data
 
@@ -28,4 +28,8 @@ Take data from transit. Join multiple tables in order to have trip_id, service_i
 
 * Drop routes where average delayed time is equal to 20 minutes. That route has undesired behavior if all the delays are ghost buses
 
-* Do a new data frame with all the information
+* Do a new data frame with all the information. There is one with basic stats and another with all the information so the user can investigate deeper if she wants to
+
+## Tests. Pytest
+
+* The folder tests have a couple of tests for each schedule data and real data analysis. They test the main functions used to analyze the data correctly and do not depend entirely on a single command
