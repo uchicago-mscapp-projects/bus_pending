@@ -179,7 +179,7 @@ These areas directly map to subfolders in the `./bus_pending` folder:
 
 -   Keling wrote all scripts in the `cleaning/` subfolder
 
--   Daniel wrote all scripts in the `analysis/` subfolder, including suggesting analytical decisions such as sample restrictions and pystest files.
+-   Daniel wrote all scripts in the `analysis/` subfolder, including suggesting analytical decisions such as sample restrictions and pystest files in tests folder.
 
 -   Regina wrote all scripts in the `visualizations` and `app` subfolders.
 
