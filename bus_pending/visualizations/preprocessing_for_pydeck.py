@@ -1,10 +1,13 @@
+import geopandas
 import geopandas as gpd
 import pandas as pd
 import pathlib
 import json
 
 
-def make_time_unix(gdf, time_column_name):
+def make_time_unix(
+    gdf: geopandas.geodataframe.GeoDataFrame, time_column_name: str
+) -> geopandas.geodataframe.GeoDataFrame:
     """
     Takes a pands column with time data and converts it into unix format.
     It then standardizes it to start from 0.
@@ -24,7 +27,9 @@ def make_time_unix(gdf, time_column_name):
     return gdf
 
 
-def transform_points_to_paths(gdf, points_col_name, time_col_name):
+def transform_points_to_paths(
+    gdf: geopandas.geodataframe.GeoDataFrame, points_col_name: str, time_col_name: str
+):
     """
     Collapses a series of points observations (stored as a geometry column)
     into a single "path" observation. The format complies with pydeck
@@ -41,7 +46,7 @@ def transform_points_to_paths(gdf, points_col_name, time_col_name):
 
     Returns (data frame): A pandas data frame with trips data. The unit of
     analysis is one observation per complete trip (instead of point in time).
-    In a format that is readable by pydeck.
+    Returned data frame has a format that is readable by pydeck.
 
     """
     trips = gdf["vid"].unique()
@@ -68,10 +73,10 @@ def transform_points_to_paths(gdf, points_col_name, time_col_name):
     return df_trips_trails
 
 
-def clean_bus_trips():
+def clean_bus_trips() -> None:
     """
     Takes bus scraped data and turns it into a format that pydeck "PathLayer"
-    can read.
+    can read. This is used for the "trips" visualizations in the dashboard.
     """
     # STEP 1. Convert raw scraped data into json
     filename = pathlib.Path(__file__).parents[0] / "scraped_data/bus_positions.json"
