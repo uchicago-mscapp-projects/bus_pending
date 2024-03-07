@@ -211,13 +211,13 @@ These areas directly map to subfolders in the `./bus_pending` folder:
 
 -   Keling wrote all scripts in the `cleaning/` subfolder
 
--   Daniel wrote all scripts in the `analysis/` subfolder, including suggesting analytical decisions such as sample restrictions and pystest files in tests folder.
+-   Daniel wrote all scripts in the `analysis/` and `tests/` subfolders, including suggesting analytical decisions such as sample restrictions and pystest files in tests folder [see discussion](https://github.com/RMedina19/bus_pending/tree/main/bus_pending/analysis). 
 
 -   Regina wrote all scripts in the `visualizations` and `app` subfolders.
 
-Tests were written for each section as needed. Due to the nature of scraping and visualizing data, we chose to not include automated testing of scraping and visualization scripts, instead reviewing each product as it was produced for quality.
+Tests were written for each section as needed. Due to the nature of scraping and visualizing data, we chose to not include automated testing of scraping and visualization scripts, instead reviewing each product as it was produced for quality. For the data processing structure component (cleaning, analysis, and visualization), Daniel assisted with code cleaning and implementation of `pathlib` library as well as type hinting. 
 
-Finally, general documentation was decided on jointly and written by Michael.
+Finally, general documentation was decided on jointly and written by Michael (who also did an amazing job keeping track of meetings, communications with the class staff and the CTA API support team, and presenting the results!). 
 
 ## 6. Conclusions and changes in Process
 
