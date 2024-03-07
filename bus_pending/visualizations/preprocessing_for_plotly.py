@@ -5,7 +5,7 @@ from skimpy import clean_columns
 import pathlib
 
 
-def clean_income_data(path: str, year: int) -> pd.core.data.frame.DataFrame:
+def clean_income_data(path: str, year: int) -> pd.core.frame.DataFrame:
     """
     Takes income data from ACS tables and aggregates it by zipcode in a format
     that easily readable by plotly.
