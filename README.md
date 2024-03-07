@@ -46,7 +46,7 @@ To scrape the script, do the following once you have the working environment set
 2. Create a database using `poetry run python3 -m scraping –makedb`. This will scrape the scheduled routes
 3. Run each iteration of the scraper by running `poetry run python3 -m scraping –quiet`. The –quiet option automatically loads the database if /data/buses.db does not exist and then downloads the full list of routes from the CTA API to scrape. 
 
-We provide a shell script schedule.sh, in the bus-pending/ folder to automate this process.
+We provide a shell script `schedule.sh`, in the bus-pending/ folder to automate this process.
 
 ## Acknowledgments
 We owe a big thank you to the guidance and encouragement from our professor, James Turk, and our Teaching Assistant: Katherine Dumais. This project wouldn’t have been possible without either of them. We also thank the countless developers who have built the open-source packages we used and who have written documentation that allowed us to learn how use these tools. 
