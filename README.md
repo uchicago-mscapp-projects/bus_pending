@@ -10,7 +10,7 @@ Bus Pending collects and analyzes high-frequency location data of Chicago’s pu
 
 This application also contains resources to schedule and request location data to continue the project. The data linked here represents one week of bus positions, from February 22nd to 28th, 2024. 
 
-Our approach is described in more detail in our [report](https://github.com/RMedina19/bus_pending/blob/main/report/00_report.pdf).
+Our approach is described in more detail in our [report](https://github.com/RMedina19/bus_pending/blob/main/proj-paper.pdf).
 
 ## Instructions :card_index:
 
