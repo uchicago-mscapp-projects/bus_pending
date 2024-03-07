@@ -20,7 +20,7 @@ time_thresholds = {
     "morning_time": datetime.strptime("06:00:00", "%H:%M:%S").time(),
     "afternoon_time": datetime.strptime("12:00:00", "%H:%M:%S").time(),
     "night_time": datetime.strptime("18:00:00", "%H:%M:%S").time(),
-    "midnight_time": datetime.strptime("00:00:00", "%H:%M:%S").time()
+    "midnight_time": datetime.strptime("23:59:00", "%H:%M:%S").time()
 }
 
 
