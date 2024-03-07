@@ -14,7 +14,7 @@ layout = html.Div(
         ),
         html.P("Feel free to wonder around this page and see some of what we found."),
         html.P(
-            'Note: If you open a Pydeck plot, return to this home page with the web browser navigator "back" button.'
+            'Note: If you open a Pydeck plot, return to this home page with the web browser navigator "back" button. These are the "CTA Bus Grid" page (that shows every bus route and stop in Chicago) and the "Bus trips" page that display ~20 minutes of bus data (in green are buses on time and on red delayed buses).'
         ),
         html.H3("About this project"),
         html.P(

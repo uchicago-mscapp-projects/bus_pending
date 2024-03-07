@@ -12,8 +12,8 @@ import os
 dash.register_page(
     __name__,
     path="/bus_stops_pydeck",
-    title="CTA Bus grid (Pydeck)",
-    name="CTA Bus grid (Pydeck)",
+    title="CTA Bus Grid (Pydeck)",
+    name="CTA Bus Grid (Pydeck)",
 )
 
 # 1. Load Mapbox token --------------------------------------------------------

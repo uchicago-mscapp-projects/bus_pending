@@ -10,8 +10,8 @@ import json
 dash.register_page(
     __name__,
     path="/income_data",
-    title="Income data (Plotly)",
-    name="Income data (Plotly)",
+    title="Income data",
+    name="Income data",
 )
 
 
