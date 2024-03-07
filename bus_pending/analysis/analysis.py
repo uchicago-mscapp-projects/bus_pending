@@ -177,7 +177,7 @@ def calculate_trip_duration(start_time: datetime, finish_time: datetime) -> floa
     return total_minutes
 
 
-def label_time_interval(time_obs: str) -> str:
+def label_time_interval(time_obs: datetime) -> str:
     """
     Given different thresholds, label the time the trip started
 
