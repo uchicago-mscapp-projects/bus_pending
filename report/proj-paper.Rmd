@@ -32,21 +32,17 @@ header-includes:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-For code, please visit the [github repo](https://github.com/RMedina19/bus_pending).
+The full code for this project is available in the [github repo](https://github.com/RMedina19/bus_pending).
 
 ## 1. Abstract
 
-We visualize inequality in transit delays in Chicago based on CTA's data on bus positions. The Chicago Transit Authority (CTA) regularly reports on bus positions and bus schedules in the city of Chicago.
-
-Our project scrapes these reports on a regular interval of one minute to gather bus and train locations and then calculate which stops are regularly delayed. For the analysis, we merge the bus locations with publicly available data on community areas to calculate which areas regularly experience delays. We then visualize which routes experience the most delays compared to data on income. These data are displayed using a Dash application.
-
-This application also contains resources to schedule and request location data to continue the project. The data linked here represents one week of bus positions, from February 22nd to 28th, 2024.
+We visualize inequality in transit delays in Chicago based on CTA's data on bus positions. The Chicago Transit Authority (CTA) regularly reports on bus positions and bus schedules in the city of Chicago. Our project scrapes these reports on a regular interval of one minute to gather bus and train locations and then calculate which stops are regularly delayed. The initial intention for the analysis, was to merge the bus locations with publicly available data on community areas to calculate which areas regularly experience delays. Given the complexity of defining a standardized definition of "delay" for every bus stop at different moments of the day and days of the week, wer where not able to cross-reference bus delays with sociodemografic information in the period of this project. We did manage to visualize which routes experience the most delays and identified that routes crossing from south-to-north face common delays. These data are displayed using a Dash application. The `bus_pending` package also contains resources to schedule and request location data to continue the project. The data linked here represents one week of bus positions equivalent to more than 4.5 million bus minutes, from February 22nd to 28th, 2024.
 
 ## 2. Data Sources
 
 ### 2.1. Bus data
 
-We collect data on bus positions and expected positions from the Chicago Transit Authority's public data. These data report high-frequency current data and schedules, but do not contain historical data that can be used to map delays.
+We collect data on bus positions and expected positions from the Chicago Transit Authority's public data. These data report high-frequency current data and schedules, but do not contain historical data.  
 
 -   [CTA bus locations](https://www.transitchicago.com/developers/bustracker/) The CTA bus tracker API provides bus locations each minute on their bus tracker API.
 
@@ -72,7 +68,7 @@ Bus Pending operates in two modes
 
 1.  Visualization: the application cleans scraped data, creates summary measures, and then passes that information to a Dash application to visualize on your local machine. We link [one week of bus locations](https://drive.google.com/file/d/1e97aufUhLLLAIf2sp-jjQ__-gJ13n83f/view?usp=drive_link) for use here.
 
-2.  Scraping: the application creates a database of current bus schedules and bus locations. We include a shell script to automate calls to the CTA API for bus locations.
+2.  Scraping: the application creates a database of current bus schedules and bus locations. We include a shell script (`schedule.sh`) to automate calls to the CTA API for bus locations.
 
 We describe details on how to run both components below:
 
@@ -80,11 +76,13 @@ We describe details on how to run both components below:
 
 The Bus Pending project can be run from a machine with Python installed.
 
-1.  Download the Bus Pending Github Repository to your local machine by running `git clone ‘https://github.com/RMedina19/bus_pending.git’` to you preferred directory.
-2.  Run `poetry install` from the top-level directory '/bus-pending' to set up the working environment in Python. Note: this requires installing Python and Poetry, a Python package manager.
+1.  Clone the Bus Pending Github Repository to your local machine by running `git clone ‘https://github.com/RMedina19/bus_pending.git’` to you preferred directory.
+2.  Run `poetry install` from the top-level directory '/bus-pending' to set up the working environment in Python. Note: this requires installing Python and [Poetry](https://python-poetry.org/docs/), a Python package manager.
 3.  Download our database of bus positions (826 mb) and place it in a data directory '/bus-pending/data' or scrape data yourself. See [below](#scraping) for details on scraping data yourself.
 4.  Clean and analyze data by running `poetry run python -m bus-pending`
-5.  Launch the dashboard by `poetry run python -m bus_pending/app`
+5. Launch the dashboard by changing the working directory to `cd bus_pending/app/` and then running `poetry run python ./app.py`. 
+  - Since the repo contains a copy of the summary statistics used for the plots, this step can be run on its own without the need of running the scrapper or the cleaning and analysis.
+  - For the `pydeck` plots to render correctly, it is necessary to have a [Mapbox API key](https://docs.mylistingtheme.com/article/how-to-generate-a-mapbox-api-key/). The user needs to store their key as a text file named `.apikey` in the directory `bus_pending/app/pages/`. If a key is not provided the bus geodata will render without a map underneath. 
 
 ### 3.2 - Scraping {#scraping}
 
@@ -96,17 +94,18 @@ Once you have an API key, we include a shell script to regularly scrape data fro
 2.  Create a database using `poetry run python3 -m scraping –makedb`. This will scrape the scheduled routes and provide users the ability to select which components to scrape.
 3.  Run each iteration of the scraper by running `poetry run python3 -m scraping –quiet`. The --quiet option automatically loads the database if /data/buses.db does not exist and then downloads the full list of routes from the CTA API to scrape without requiring user input.
 
-We provide a shell script schedule.sh, in the `./bus-pending/` folder to automate this process.
+We provide a shell script `schedule.sh`, in the `./bus-pending/` folder to automate this process.
 
 ## 4. Application Structure
 
-We structure the dataflow in two parts, aligning with the scraping and visualization described in Section 3. This data flow is visualized below:
+We structure the data workflow in two parts, aligning with the scraping and visualization described in Section 3. This data flow is visualized below:
 
 
-```{r stata_plots, out.height="80%", out.width="80%", fig.align="center", echo = FALSE}
+```{r workflow, out.height="80%", out.width="80%", fig.align="center", echo = FALSE}
 knitr::include_graphics("Bus_Pending_Dataflow.png")
 ```
 
+\newpage
 
 These lead to a structure:
 
@@ -118,6 +117,13 @@ bus_pending/
         compare_schedule_real_data.py
     app/
         app.py
+        pages/
+          .apikey
+          deck_bus_grid.py
+          deck_trips.py
+          home.py
+          plotly_income.py
+          plotly_summary_stats.py
     cleaning/
         clean.py
     scraping/
@@ -127,14 +133,16 @@ bus_pending/
         scrape_routes.py
         scrape_schedules.py
     visualizations/
-        acs.py
-        app.py
-        deck_app.py
-        maps.py
+        acs_data/
+        geodata/
+        scraped_data/
+        preprocessing_for_plotly.py
+        preprocessing_for_pydeck.py
     __init__.py
     __main__.py
     shcedule.sh
 data/
+    instructions.md
     buses.db
 tests/
 .apikey
@@ -143,7 +151,7 @@ routes.txt
 
 ### 4.1 - Scraping Data Structure
 
-The scraping elements are a standalone dataflow, meant to be collected once for visualization. These scripts conduct three tasks:
+The scraping elements are a standalone data workflow, meant to be collected once for visualization. These scripts conduct three tasks:
 
 1.  `scrape_routes.py` requests and store a list of routes locally from the CTA Bus Tracker API for future requests.
 2.  `make_db.py` creates a sqlite3 database in an ignored folder `./data` for schedule and bus location data.
@@ -152,13 +160,35 @@ The scraping elements are a standalone dataflow, meant to be collected once for 
 
 For projects that want to scrape delay data, (4) can be conducted regularly using scheduled calls to the schedule.sh shell script. The standard API key will allow calls every other minute.
 
-### 4.2 - Visualization Data Structure
+### 4.2 - Data Processing Structure
 
 The visualization application is the primary component. Once data are downloaded, it:
 
 1.  `clean.py` queries the `./data/buses.db` database to extract bus-minute-level data and returns a route-level dataset with relevant columns as a CSV in the ignored `/data/` folder.
-2.  `analyze_real_data.py` and `analysis.py` Combines the route-level data with expected timing data from the `buses.db` data and determines delays.
-3.  !! Regina to add app structure
+
+2.  `analyze_real_data.py` and `analysis.py` combine the route-level data with expected timing data from the `buses.db` data and determines delays.
+
+3.  The `preprocessing_for_plotly.py` and `preprocessing_for_pydeck.py` take the income, scraped and shapefiles raw data and converts it to the formats that are correctly parsed by the Plotly and Pydeck visualization packages. For instance, the visualization of the trips in Chicago uses `Pydeck`'s `PathLayer`. For the layer to parse the scraped data correctly, each trip set of observations had to be collapsed into a single row, CTA's geometries had to be transformed to a list of longitude-latitude pairs, and the time stamps had to be converted to unix standard. 
+
+### 4.3 - Dashboard Structure 
+
+The visual outputs of the project are presented in a Dash application with interactive visualizations. The app can be launched without the need of running the scrapper nor the data processing. Because it follows a multi-page design from Dash, the app is built by five "pages" python scripts that are managed and called by `app.py`. 
+
+Examples of the visual output included in the Dash App are presented in the following images: 
+
+```{r workflow1, out.height="80%", out.width="80%", fig.align="center", echo = FALSE}
+knitr::include_graphics("app_bus_pending1.png")
+```
+
+```{r workflow2, out.height="80%", out.width="80%", fig.align="center", echo = FALSE}
+knitr::include_graphics("app_bus_pending2.png")
+```
+
+```{r workflow3, out.height="80%", out.width="80%", fig.align="center", echo = FALSE}
+knitr::include_graphics("app_bus_pending3.png")
+```
+
+
 
 ## 5. Members and Responsibilities
 
@@ -172,6 +202,8 @@ We split our coding responsibilities by each component of the application descri
 |      Keling Yue      |   [GitHub](https://github.com/keling888)   |         Cleaning         |
 |     Daniel Muñoz     | [GitHub](https://github.com/dmunozbatista) |         Analysis         |
 | Regina Isabel Medina |   [GitHub](https://github.com/RMedina19)   | Visualization and Server |
+
+\newpage
 
 These areas directly map to subfolders in the `./bus_pending` folder:
 
@@ -187,7 +219,7 @@ Tests were written for each section as needed. Due to the nature of scraping and
 
 Finally, general documentation was decided on jointly and written by Michael.
 
-## 6. Changes in Process
+## 6. Conclusions and changes in Process
 
 We initially set out to map administrative burden experienced in Chicago neighborhoods using train and bus access data to measure variation in wait time due to public transport delays. This was an ambitious goal. We accomplished a significant portion of that goal with this application, collecting one week of high-frequency data on bus positions that can be used to measure delays and then analyzing delays by route, and therefore location.
 
