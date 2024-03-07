@@ -1,23 +1,24 @@
 import dash
-from dash import Dash, html, dcc, Input, Output, callback
+from dash import html, dcc, Input, Output, callback
 import plotly.express as px
 import pandas as pd
 import pathlib
 
-# Register as Dash page -------------------------------------------------------
+# 0. Register as Dash page ----------------------------------------------------
 
 dash.register_page(
     __name__, path="/summary_stats", title="Delays statistics", name="Delays statistics"
 )
 
 
-# Load data -------------------------------------------------------------------
+# 1. Load data ----------------------------------------------------------------
 
 filename = (
     pathlib.Path(__file__).parents[2] / "visualizations/scraped_data/stats_df.csv"
 )
 df_stats = pd.read_csv(filename)
 
+# 2. Filter statistics --------------------------------------------------------
 
 # Wide format and average indicators
 df_stats_long = pd.melt(
@@ -37,9 +38,9 @@ df_average = (
 df_average["rt"] = "Average"
 
 
-# Find your route plot --------------------------------------------------------
+# 3. Build plots --------------------------------------------------------------
 
-# Percentage of delays --------------------------------------------------------
+## 3.0. Percentage of delays --------------------------------------------------
 
 plot_data = df_stats[:15]
 fig_percentage = px.bar(
@@ -63,9 +64,8 @@ fig_percentage.update(layout_xaxis_range=[0, 100])
 fig_percentage.update_xaxes(ticksuffix=" %", showgrid=True)  # the y-axis is in dollars
 fig_percentage.update_traces(marker_color="#8F3931")
 
-# fig.show()
 
-# Longest waiting times -------------------------------------------------------
+## 3.1. Longest waiting times -------------------------------------------------
 
 data_max_time = df_stats.sort_values("max_delayed_time", ascending=False)[:15]
 
@@ -85,7 +85,7 @@ fig_max_time.update_layout(yaxis=dict(autorange="reversed"))
 fig_max_time.update_traces(marker_color="#8F3931")
 
 
-# Total delays ----------------------------------------------------------------
+## 3.2. Total delays ----------------------------------------------------------
 
 # Number of delayed buses in a week
 data_num_delays = df_stats.sort_values("n_delayed", ascending=False)[:15]
@@ -105,7 +105,7 @@ fig_num_delays = px.bar(
 fig_num_delays.update_layout(yaxis=dict(autorange="reversed"))
 fig_num_delays.update_traces(marker_color="#8F3931")
 
-## 1.3. Layout ----------------------------------------------------------------
+# 4. Layout -------------------------------------------------------------------
 
 layout = html.Div(
     [
@@ -123,7 +123,7 @@ layout = html.Div(
 )
 
 
-# 1.4 Interactive controls ----------------------------------------------------
+# 5. Interactive controls -----------------------------------------------------
 
 
 @callback(

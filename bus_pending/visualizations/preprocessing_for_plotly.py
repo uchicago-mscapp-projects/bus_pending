@@ -24,7 +24,6 @@ def clean_income_data(path: str, year: int) -> pd.core.data.frame.DataFrame:
     df_income_raw = pd.read_csv(file)
     file.close()
 
-    # Clean data set
     # Clean variable names from income table
     df_income_wide = clean_columns(df_income_raw)
     df_income_wide = df_income_wide.drop(
@@ -36,8 +35,7 @@ def clean_income_data(path: str, year: int) -> pd.core.data.frame.DataFrame:
         df_income_wide["label_grouping"].str.contains("Total")
     ]
 
-    # Change to long format
-    # Store all column names for zip codes
+    # Change to long format, store all column names for zip codes
     zip_cols = df_income_wide.columns[1:1399]
     df_income = pd.melt(df_income_wide, id_vars="label_grouping", value_vars=zip_cols)
 

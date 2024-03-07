@@ -1,10 +1,12 @@
 import dash
-from dash import Dash, html, dcc, Input, Output
+from dash import html
 import pandas as pd
 import pydeck as pdk
 import dash_deck
+import pathlib
+import os
 
-# Register as Dash page -------------------------------------------------------
+# 0. Register as Dash page ----------------------------------------------------
 
 dash.register_page(
     __name__,
@@ -13,20 +15,27 @@ dash.register_page(
     name="Bus trips (Pydeck)",
 )
 
-# 0. Load Mapbox token --------------------------------------------------------
+# 1. Load Mapbox token --------------------------------------------------------
 
-# mapbox_key = get_stored_data('visualizations/.apikey', 'key')
-mapbox_key = ""
+mapbox_key_path = pathlib.Path(__file__).parents[0] / ".apikey"
 
-# 1. Clean and plot data ------------------------------------------------------
+if os.path.exists(mapbox_key_path):
+    file = open(mapbox_key_path)
+    mapbox_key = file.read()
+    file.close()
+else:
+    mapbox_key = ""
 
-## 1.5. Geo data: Trips trails ------------------------------------------------
+
+# 2. Clean and plot data ------------------------------------------------------
+
+## 2.0. Geo data: Trips trails ------------------------------------------------
 
 file = open("../visualizations/geodata/trips_trails.json")
 df_trips_trails = pd.read_json(file)
 file.close()
 
-# Separete data frame by delay 
+# Separete data frame by delay
 df_delays = df_trips_trails[df_trips_trails["delay"]]
 delayed_buses = list(df_delays["vid"])
 df_on_time = df_trips_trails[~df_trips_trails["vid"].isin(delayed_buses)]
@@ -76,16 +85,13 @@ deck_component_trails = dash_deck.DeckGL(
     id="deck-gl",
     tooltip=True,
     mapboxKey=mapbox_key,
-    # style={"width": "50vw", "height": "50vh"}
 )
 
-# 2. APP ----------------------------------------------------------------------
-# 2.1 Initialize app ----------------------------------------------------------
+
+# 3. Define app layout --------------------------------------------------------
 
 # App layout with deck components
-# https://medium.com/@lorenzoperozzi/a-journey-into-plotly-dash-5791228212ff
-
-# 2.2 Define app layout -------------------------------------------------------
+# Source: https://medium.com/@lorenzoperozzi/a-journey-into-plotly-dash-5791228212ff
 
 layout = html.Div(
     [

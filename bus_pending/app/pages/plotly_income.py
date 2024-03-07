@@ -5,7 +5,7 @@ import pandas as pd
 import json
 
 
-# Register as Dash page -------------------------------------------------------
+# 0. Register as Dash page ----------------------------------------------------
 
 dash.register_page(
     __name__,
@@ -15,32 +15,32 @@ dash.register_page(
 )
 
 
-## 1.1. Income data -----------------------------------------------------------
+# 1. Load data ----------------------------------------------------------------
 
 # Load income data
 file = open("../visualizations/acs_data/df_income_zip_code_series.csv")
 df_income = pd.read_csv(file)
 file.close()
 
-## 1.2. Geo data: Chicago zip code boundaries ---------------------------------
 
+# Load Chicago zip codes boundaries
 # Load geodata for zip codes
 file = open("../visualizations/geodata/Boundaries_ZIP_Codes.geojson")
 geo_zip_codes = json.load(file)
 file.close()
 
-# Building a trial dataset
+
+# Make a list of all zip codes in Chicago
 chicago_zip_codes = []
 
 for zip in geo_zip_codes["features"]:
-    # print(zip["properties"]["zip"])
     chicago_zip_codes.append(zip["properties"]["zip"])
 
-# Build a data set with all zip codes
+# Build a data set with mean income for all zip codes
 df_income["zip"] = df_income["zip"].astype("string")
 df_income_chicago = df_income[df_income["zip"].isin(chicago_zip_codes)]
 
-## 1.3. Layout ----------------------------------------------------------------
+## 2. App Layout --------------------------------------------------------------
 
 layout = html.Div(
     [
@@ -57,7 +57,7 @@ layout = html.Div(
     ]
 )
 
-# 1.4 Interactive controls ----------------------------------------------------
+# 3. Interactive controls -----------------------------------------------------
 
 
 @callback(
