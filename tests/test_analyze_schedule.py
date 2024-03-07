@@ -1,6 +1,6 @@
 import pandas as pd
-import pytest
-from bus_pending.analysis.analysis import keep_last_and_first, calculate_trip_duration
+from datetime import datetime
+from bus_pending.analysis.analysis import keep_last_and_first, calculate_trip_duration, label_time_interval
 
 # Values to test keep last and first function
 columns_keep = ["trip_id", "weekday", "weekend", "arrival_time", "stop_id", "route_id"]
@@ -28,6 +28,11 @@ df_keep = pd.DataFrame(data_keep, columns=columns_keep)
 # Values to test calculate trip duration
 simple_case = pd.Timedelta(hours=4, minutes=30).total_seconds() / 60
 negative_case = pd.Timedelta(hours=1, minutes=10).total_seconds() / 60
+
+# Values to test time label
+label_night = datetime.strptime("21:00:00", "%H:%M:%S")
+label_midnight = datetime.strptime("00:00:00", "%H:%M:%S")
+label_morning = datetime.strptime("06:00:00", "%H:%M:%S")
 
 
 def test_keep_first_and_last():
@@ -76,3 +81,15 @@ def test_calculate_duration():
         raise AssertionError(
             f"Actual estimation: {actual_estimation_2} is not equal to expected estimation: {negative_case}. Check cases with negative values!"
         )
+
+
+def test_label_times():
+    actual_label_morning = label_time_interval(label_morning)
+    if actual_label_morning != "morning":
+        raise AssertionError(f"Actual label {actual_label_morning} is different from expected label 'morning")
+    actual_label_night = label_time_interval(label_night)
+    if actual_label_night != "night":
+        raise AssertionError(f"Actual label {actual_label_night} is different from expected label 'night")
+    actual_label_midnight = label_time_interval(label_midnight)
+    if actual_label_midnight != "midnight":
+        raise AssertionError(f"Actual label {actual_label_midnight} is different from expected label 'midnight")

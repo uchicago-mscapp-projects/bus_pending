@@ -20,7 +20,7 @@ Take data from transit. Join multiple tables in order to have trip_id, service_i
 
 * Transform the time stamp to DeltaTime and then estimate the day_time and label them as weekday or weekend (they can be both since there aere service days that runs every day)
 
-* Take the average distance by route. If the observation has less than two standard deviations from the mean then label it as "ghost". Impute a delay of 30 minutes to that route
+* Take the average distance by route. If the observation has less than two standard deviations from the mean then label it as "ghost". Impute a delay of 20 minutes to that route
 
 * Delete observations with characteristics not found in scheduled data. Transit does not have complete schedules
 
