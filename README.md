@@ -44,6 +44,8 @@ To scrape the script, do the following once you have the working environment set
 
 We provide a shell script schedule.sh, in the bus-pending/ folder to automate this process.
 
+![](https://github.com/RMedina19/bus_pending/blob/main/dash_demo.gif)
+
 ## Acknowledgments
 We owe a big thank you to guidance and encouragement from our professor, James Turk, and our Teaching Assistant: Katherine Dumais. This project wouldn’t have been possible without either of them.
 
