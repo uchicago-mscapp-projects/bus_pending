@@ -101,7 +101,7 @@ def error_dealing(subset: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
     """
     trip_sequence = list(set(subset['group'].values.tolist()))
     # first we filter out top and bottom rows
-    subset['error']=np.where(subset['group'].isin(trip_sequence[1:-1:1]), \
+    subset['error'] = np.where(subset['group'].isin(trip_sequence[1:-1:1]), \
                              'complete', 'middle_cut')
     # then we deal with the rest
     condition = subset['error'] == 'complete'
@@ -178,7 +178,6 @@ def create_duration_df(filename: str)-> pd.core.frame.DataFrame:
     final_dfs = turn_degree_to_dir(final_dfs)
     final_dfs = final_dfs.reset_index(drop=True)
 
-    #final_dfs.to_csv(pathlib.Path(__file__).parent.parent/'data/trip_time_level.csv')
     return final_dfs
 
 

@@ -6,10 +6,6 @@ from typing import Tuple
 import pathlib
 
 
-csv_path_stats = pathlib.Path(__file__).parents[2] / "data/stats_df.csv"
-csv_path_complete = pathlib.Path(__file__).parents[2] / "data/complete_info.csv"
-
-
 def determine_time_data(time_stmp: str) -> Tuple[str, bool]:
     """
     Given a time stamp, determine if the observation was on weekend and the
@@ -25,6 +21,7 @@ def determine_time_data(time_stmp: str) -> Tuple[str, bool]:
     date_object = datetime.strptime(time_stmp, "%Y%m%d %H:%M")
     day = date_object.weekday()
     weekend = None
+    
     if day < 5:
         weekend = True
     else:
