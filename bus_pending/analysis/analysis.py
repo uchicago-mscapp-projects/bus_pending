@@ -16,6 +16,13 @@ ORDER BY schedule.arrival_time;
 """
 seconds_in_day = 86400
 
+time_thresholds = {
+    "morning_time": datetime.strptime("06:00:00", "%H:%M:%S").time(),
+    "afternoon_time": datetime.strptime("12:00:00", "%H:%M:%S").time(),
+    "night_time": datetime.strptime("18:00:00", "%H:%M:%S").time(),
+    "midnight_time": datetime.strptime("23:59:00", "%H:%M:%S").time()
+}
+
 
 def analyze_schedule(filename: str, query_sch: str) -> pd.core.frame.DataFrame:
     """
@@ -95,7 +102,22 @@ def keep_last_and_first(filtered_df: pd.core.frame.DataFrame):
         ],
         axis=1,
     )
-    transformed_df = selected_obs[
+    transformed_df = clean_columns(selected_obs)
+    return transformed_df
+
+
+def clean_columns(df_colapsed: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
+    """
+    After collapsing the dataframe to have only the first and the last observation
+    per trip, keep only columns of interest and clean column names
+
+    Inputs:
+        df_colapsed (dataframe): dataframe after collapsing to keep desired observations
+
+    Return:
+        transformed_df (dataframe): cleaned dataframe
+    """
+    transformed_df = df_colapsed[
         [
             "trip_id",
             ("weekday", "first"),
@@ -121,7 +143,6 @@ def keep_last_and_first(filtered_df: pd.core.frame.DataFrame):
     return transformed_df
 
 
-# Clean time data. Go from string to time
 def clean_time(time_str: str) -> datetime:
     """
     Some observations registered 24 and 25 hours, we have to fix it before
@@ -156,7 +177,7 @@ def calculate_trip_duration(start_time: datetime, finish_time: datetime) -> floa
     return total_minutes
 
 
-def label_time_interval(time_obs: str) -> str:
+def label_time_interval(time_obs: datetime) -> str:
     """
     Given different thresholds, label the time the trip started
 
@@ -168,10 +189,10 @@ def label_time_interval(time_obs: str) -> str:
     """
 
     # Define time thresholds
-    morning_time = datetime.strptime("06:00:00", "%H:%M:%S").time()
-    afternoon_time = datetime.strptime("12:00:00", "%H:%M:%S").time()
-    night_time = datetime.strptime("18:00:00", "%H:%M:%S").time()
-    midnight_time = datetime.strptime("23:59:00", "%H:%M:%S").time()
+    morning_time = time_thresholds["morning_time"]
+    afternoon_time = time_thresholds["afternoon_time"]
+    night_time = time_thresholds["night_time"]
+    midnight_time = time_thresholds["midnight_time"]
 
     # Check which time interval the time falls into
     if morning_time <= time_obs.time() < afternoon_time:

@@ -2,8 +2,8 @@ import sys
 import pathlib
 
 # import bus_pending.app as app
-import bus_pending.analysis.analyze_real_data as analyze
 import bus_pending.cleaning.clean as clean
+import bus_pending.analysis.do_analysis as analyze
 import bus_pending.visualizations.preprocessing_for_plotly as viz_plotly
 import bus_pending.visualizations.preprocessing_for_pydeck as viz_pydeck
 

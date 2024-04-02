@@ -1,32 +1,36 @@
 import dash
-from dash import Dash, html, dcc, Input, Output
-import plotly.express as px
+from dash import html
 import geopandas as gpd
-import pandas as pd
 import pydeck as pdk
 import dash_deck
 import fsspec
-import dash_bootstrap_components as dbc
+import pathlib
+import os
 
-
-# Register as Dash page -------------------------------------------------------
+# 0. Register as Dash page ----------------------------------------------------
 
 dash.register_page(
     __name__,
     path="/bus_stops_pydeck",
-    title="CTA Bus grid (Pydeck)",
-    name="CTA Bus grid (Pydeck)",
+    title="CTA Bus Grid (Pydeck)",
+    name="CTA Bus Grid (Pydeck)",
 )
 
-# 0. Load Mapbox token --------------------------------------------------------
+# 1. Load Mapbox token --------------------------------------------------------
 
-# mapbox_key = get_stored_data('visualizations/.apikey', 'key')
-mapbox_key = "pk.eyJ1Ijoicm1lZGluYTE5IiwiYSI6ImNsdDM3cWR2YjFrY3cyanA4MzM4cDJhMzEifQ.WQeC2uliJwPjp96Z2M4sSw"
+mapbox_key_path = pathlib.Path(__file__).parents[0] / ".apikey"
+
+if os.path.exists(mapbox_key_path):
+    file = open(mapbox_key_path)
+    mapbox_key = file.read()
+    file.close()
+else:
+    mapbox_key = ""
 
 
-# 1. Clean and plot data ------------------------------------------------------
+# 2. Clean and plot data ------------------------------------------------------
 
-## 1.3. Geo data: Chicago bus stops -------------------------------------------
+## 2.0. Geo data: Chicago bus stops -------------------------------------------
 
 ### Bus stops geo data
 geo_bus_stops = gpd.read_file("../visualizations/geodata/CTA_Bus_Stops.geojson")
@@ -45,7 +49,7 @@ layers_stops = [
 ]
 
 
-## 1.4. Geo data: Chicago bus routes ------------------------------------------
+## 2.1. Geo data: Chicago bus routes ------------------------------------------
 
 path = "../visualizations/geodata/CTA_BusRoutes__2_.zip"
 with fsspec.open(path) as file:
@@ -103,13 +107,12 @@ deck_component_bus_grid = dash_deck.DeckGL(
     tooltip=True,
     mapboxKey=mapbox_key,
 )
-# 2. APP ----------------------------------------------------------------------
-# 2.1 Initialize app ----------------------------------------------------------
+
+
+# 3 Define app layout ---------------------------------------------------------
 
 # App layout with deck components
-# https://medium.com/@lorenzoperozzi/a-journey-into-plotly-dash-5791228212ff
-
-# 2.2 Define app layout -------------------------------------------------------
+# Source: https://medium.com/@lorenzoperozzi/a-journey-into-plotly-dash-5791228212ff
 
 layout = html.Div(
     [

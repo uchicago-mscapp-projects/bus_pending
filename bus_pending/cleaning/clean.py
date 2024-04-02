@@ -171,7 +171,6 @@ def create_duration_df(filename: str)-> pd.core.frame.DataFrame:
         subset = error_dealing(subset)
         complete_subset = determine_occurrence(subset[subset['error'] == 'complete'])
         final_bus_level = final_observation(complete_subset)
-        #final_bus_level.sort_values(['group', 'tmstmp'], inplace=True)
         collapsed_df = final_bus_level.groupby('group').last().reset_index()
         concat_subsets.append(collapsed_df[collapsed_df['durations']<180])
     final_dfs = pd.concat(concat_subsets)

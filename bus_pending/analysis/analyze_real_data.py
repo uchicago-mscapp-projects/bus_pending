@@ -1,9 +1,8 @@
 import pandas as pd
 import numpy as np
 from datetime import datetime
-from bus_pending.analysis.analysis import analyze_schedule, filename, query_sch
+from bus_pending.analysis.analysis import time_thresholds
 from typing import Tuple
-import pathlib
 
 
 def determine_time_data(time_stmp: str) -> Tuple[str, bool]:
@@ -29,10 +28,10 @@ def determine_time_data(time_stmp: str) -> Tuple[str, bool]:
 
     day_time = None
     # Thresholds
-    morning_time = datetime.strptime("06:00:00", "%H:%M:%S").time()
-    afternoon_time = datetime.strptime("12:00:00", "%H:%M:%S").time()
-    night_time = datetime.strptime("18:00:00", "%H:%M:%S").time()
-    midnight_time = datetime.strptime("23:59:00", "%H:%M:%S").time()
+    morning_time = time_thresholds["morning_time"]
+    afternoon_time = time_thresholds["afternoon_time"]
+    night_time = time_thresholds["night_time"]
+    midnight_time = time_thresholds["midnight_time"]
 
     time_obs = date_object.time()
     if morning_time <= time_obs < afternoon_time:
@@ -110,16 +109,31 @@ def create_df_stats(final_dfs: pd.core.frame.DataFrame) -> pd.core.frame.DataFra
     )
 
     delayed_df_sorted = delayed_df.sort_values(by="percentage_delayed", ascending=False)
-    max_delayed_time_rt = final_dfs_filtered.groupby("rt")["delayed_time"].max()
+    delayed_df_with_max_delay = merge_max_delayes_df(final_dfs_filtered, delayed_df_sorted)
+    return delayed_df_with_max_delay
 
-    # Create a new DataFrame with 'rt' and 'max_delayed_time' columns
+
+def merge_max_delayes_df(final_dfs_filtered, delayed_df_sorted):
+    """
+    Estimate the maximum delay time per route and merge the result with our
+    stats dataframe
+
+    Inputs:
+        final_dfs_filtered (dataframe): dataframe with all the information
+        delayed_df_sorted (dataframe): has already the other stats per route
+
+    Return:
+        delayed_df_with_max_delay(dataframe): new dataframe that now has the
+            variable max_delayed_time per route
+    """
+    max_delayed_time_rt = final_dfs_filtered.groupby("rt")["delayed_time"].max()
     max_delayed_time_df = pd.DataFrame(
         {
             "rt": max_delayed_time_rt.index,
             "max_delayed_time": max_delayed_time_rt.values,
         }
     )
-    # Merge with existing DataFrame
+    # Merge with existing DataFrame with stats
     delayed_df_with_max_delay = delayed_df_sorted.merge(max_delayed_time_df, on="rt")
     return delayed_df_with_max_delay
 
@@ -155,38 +169,28 @@ def estimate_delay(
             df_real_data.loc[observation.name, "delayed_time"] = delayed_time
         else:
             df_real_data.loc[observation.name, "delayed_time"] = 0
+    
 
-
-def do_analysis():
+def label_ghosts(final_dfs):
     """
-    This function does all the analysis. From analyzing schedule data to analyze
-        real data and then compare them to estimate delays. Creates two
-        different csv files with information aboute routes. First file contains
-        all data by route so the user can derive new stats. Second file contains
-        basic stats by route
+    As we defined in the README, we are going to consider two standard deviations
+    from the average distance in x route to label a bus as a ghost. If it
+    traveled considerable less distance then it didnt complete the trip. We need
+    to estimate the mean and sd per route
 
-    Input:
-        final_dfs (DataFrame): dataframe cleaned in cleaning directory
+    Inputs:
+        final_dfs (dataframe): dataframe with day_time and weekend variables
+    
+    Return:
+        df_ghosts (dataframe): dataframe with boolean variable ghost that
+            indicates a bus didnt complete the route. Also it only has the
+            desired columns
     """
-    final_dfs = pd.read_csv(pathlib.Path(__file__).parents[2] / "data/trip_time_level.csv")
-    final_dfs = final_dfs[final_dfs["consecutive_counts_y"].notna()]
-    csv_path_stats = pathlib.Path(__file__).parents[2] / "data/stats_df.csv"
-    csv_path_complete = pathlib.Path(__file__).parents[2] / "data/complete_info.csv"
-    avg_trip_weekday, avg_trip_weekend = analyze_schedule(filename, query_sch)
-
-    final_dfs[["day_time", "weekend"]] = final_dfs["tmstmp"].apply(
-        lambda x: pd.Series(determine_time_data(x))
-    )
     mean_dist_route = final_dfs.groupby("rt")["total_dist"].mean()
     std_distance_route = final_dfs.groupby("rt")["total_dist"].std()
     final_dfs["ghost"] = final_dfs.apply(
         lambda x: find_ghost_buses(x, mean_dist_route, std_distance_route), axis=1
     )
     desired_columns = ["rt", "day_time", "weekend", "ghost", "consecutive_counts_y"]
-    final_dfs = final_dfs[desired_columns]
-    estimate_delay(final_dfs, avg_trip_weekday, avg_trip_weekend)
-    final_dfs["delay"] = final_dfs["delayed_time"].apply(lambda x: 1 if x > 0 else 0)
-    final_dfs.to_csv(csv_path_complete)
-    df_stats = create_df_stats(final_dfs)
-    df_stats.to_csv(csv_path_stats)
-    
+    df_ghosts = final_dfs[desired_columns]
+    return df_ghosts

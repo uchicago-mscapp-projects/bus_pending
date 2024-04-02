@@ -1,7 +1,10 @@
 import dash
 from dash import html
 
+# 0. Register as Dash page ----------------------------------------------------
 dash.register_page(__name__, path="/")
+
+## 1. App Layout --------------------------------------------------------------
 
 layout = html.Div(
     [
@@ -11,7 +14,7 @@ layout = html.Div(
         ),
         html.P("Feel free to wonder around this page and see some of what we found."),
         html.P(
-            'Note: If you open a Pydeck plot, return to this home page with the web browser navigator "back" button.'
+            'Note: If you open a Pydeck plot, return to this home page with the web browser navigator "back" button. These are the "CTA Bus Grid" page (that shows every bus route and stop in Chicago) and the "Bus trips" page that display ~20 minutes of bus data (in green are buses on time and on red delayed buses).'
         ),
         html.H3("About this project"),
         html.P(
@@ -45,9 +48,12 @@ layout = html.Div(
             ],
         ),
         html.H4("Libraries"),
-        html.P("We scrape, clean, and analyze these data using Python 3.12, store the data in sqlite3, and visualize the data on a Dash app using Plotly and PyDeck. Our cleaning frameworks are Pandas and GeoPandas."),
+        html.P(
+            "We scrape, clean, and analyze these data using Python 3.12, store the data in sqlite3, and visualize the data on a Dash app using Plotly and PyDeck. Our cleaning frameworks are Pandas and GeoPandas."
+        ),
         html.H4("Acknoledgments"),
-        html.P("We owe a big thank you to guidance and encouragement from our professor, James Turk, and our Teaching Assistant: Katherine Dumais. This project wouldn’t have been possible without either of them. We also would like to thank the open source community who have invested time and effort building and documenting the tools we used for this project.")
-
+        html.P(
+            "We owe a big thank you to guidance and encouragement from our professor, James Turk, and our Teaching Assistant: Katherine Dumais. This project wouldn’t have been possible without either of them. We also would like to thank the open source community who have invested time and effort building and documenting the tools we used for this project."
+        ),
     ]
 )
